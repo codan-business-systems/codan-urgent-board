@@ -1,0 +1,96 @@
+{
+	"_version": "1.8.0",
+	"sap.app": {
+		"id": "codan.zurgentboard",
+		"type": "component",
+		"applicationVersion": {
+			"version": "1.0.0"
+		},
+		"title": "{{appTitle}}",
+		"description": "{{appDescription}}",
+		"sourceTemplate": {
+			"id": "ui5template.basicSAPUI5ApplicationProject",
+			"version": "1.38.11"
+		},
+		"dataSources": {
+			"Z_URGENT_BOARD_SRV": {
+				"uri": "/sap/opu/odata/sap/Z_URGENT_BOARD_SRV/",
+				"type": "OData",
+				"settings": {
+					"localUri": "localService/metadata.xml"
+				}
+			}
+		},
+		"_version": "1.3.0"
+	},
+
+	"sap.ui": {
+		"technology": "UI5",
+		"icons": {
+			"icon": "",
+			"favIcon": "",
+			"phone": "",
+			"phone@2": "",
+			"tablet": "",
+			"tablet@2": ""
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		},
+		"supportedThemes": [
+			"sap_hcb",
+			"sap_bluecrystal"
+
+		],
+		"_version": "1.3.0"
+	},
+
+	"sap.ui5": {
+		"dependencies": {
+			"minUI5Version": "1.30.0",
+			"libs": {
+				"sap.ui.layout": {},
+				"sap.ui.core": {},
+				"sap.m": {}
+			},
+			"components": {
+				"codan.z_ie11_polyfill": {}
+			}
+		},
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "codan.zurgentboard.i18n.i18n"
+				}
+			},
+			"": {
+				"type": "sap.ui.model.odata.v2.ODataModel",
+				"settings": {
+					"defaultOperationMode": "Server",
+					"defaultBindingMode": "OneWay",
+					"defaultCountMode": "Request"
+				},
+				"dataSource": "Z_URGENT_BOARD_SRV"
+			},
+			"viewModel": {
+				"type": "sap.ui.model.json.JSONModel",
+				"settings": {}
+			}
+		},
+		"resources": {
+			"css": [
+				{
+					"uri": "css/style.css"
+				}
+			]
+		},
+		"_version": "1.2.0"
+	}
+}

@@ -1,0 +1,179 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:core="sap.ui.core" >
+	<Dialog
+		id="createItemDialog"
+		busy="{viewModel>/state/busy}"
+		busyIndicatorDelay="0"
+		title="Add Item to Urgent Board">
+		<content>
+			<form:Form
+				editable="true"
+				width="800px"
+				binding="{viewModel>/fields}"
+				class="editableForm">
+				<form:layout>
+					<form:ResponsiveGridLayout
+						labelSpanL="4"
+						labelSpanM="4"
+						emptySpanL="0"
+						emptySpanM="0"
+						columnsL="2"
+						columnsM="2"/>
+				</form:layout>
+				<form:formContainers>
+					<form:FormContainer>
+						<form:formElements>
+							<form:FormElement
+								label="{viewModel>material/label}"
+								visible="{= !${viewModel>description/value}}">
+								<form:fields>
+									<Input
+										type="Text"
+										value="{viewModel>material/value}"
+										valueState="{viewModel>material/valueState}"
+										valueStateText="{viewModel>material/valueStateText}"/>
+								</form:fields>
+							</form:FormElement>
+							<form:FormElement
+								label="{viewModel>description/label}"
+								visible="{= !${viewModel>material/value}}">
+								<form:fields>
+									<Input
+										type="Text"
+										value="{viewModel>description/value}"
+										valueState="{viewModel>description/valueState}"
+										valueStateText="{viewModel>description/valueStateText}"/>
+								</form:fields>
+							</form:FormElement>
+							<form:FormElement label="{viewModel>type/label}">
+								<form:fields>
+									<Select
+										selectedKey="{viewModel>type/value}"
+										change="onTypeChange"
+										items="{viewModel>/referenceTypes}">
+										<core:Item key="{viewModel>id}" text="{viewModel>description}" />
+									</Select>
+								</form:fields>
+							</form:FormElement>
+							<form:FormElement
+								label="{viewModel>objectkey/label}"
+								visible="{= ${viewModel>type/value} !== ''}">
+								<form:fields>
+									<Input
+										type="Number"
+										value="{viewModel>objectkey/value}"
+										valueState="{viewModel>objectkey/valueState}"
+										valueStateText="{viewModel>objectkey/valueStateText}"/>
+
+								</form:fields>
+							</form:FormElement>
+							<form:FormElement
+								label="{viewModel>line/label}"
+								visible="{= ${viewModel>type/value} === 'P' || ${viewModel>type/value} === 'S' }">
+								<form:fields>
+									<Input
+										type="Number"
+										value="{viewModel>line/value}"
+										valueState="{viewModel>line/valueState}"
+										valueStateText="{viewModel>line/valueStateText}"/>
+								</form:fields>
+							</form:FormElement>
+							<form:FormElement label="{viewModel>quantity/label}">
+								<form:fields>
+									<Input
+										type="Number"
+										visible="{= !${viewModel>unlimitedQuantity/value} }"
+										value="{viewModel>quantity/value}"
+										valueState="{viewModel>quantity/valueState}"
+										valueStateText="{viewModel>quantity/valueStateText}"/>
+									<CheckBox
+										text="{viewModel>unlimitedQuantity/label}"
+										selected="{viewModel>unlimitedQuantity/value}"
+										valueState="{viewModel>unlimitedQuantity/valueState}"/>
+								</form:fields>
+							</form:FormElement>
+							<form:FormElement label="{viewModel>uom/label}">
+								<form:fields>
+									<Input
+										type="Text"
+										value="{viewModel>uom/value}"
+										valueState="{viewModel>uom/valueState}"
+										valueStateText="{viewModel>uom/valueStateText}"/>
+								</form:fields>
+							</form:FormElement>
+						</form:formElements>
+					</form:FormContainer>
+					<form:FormContainer>
+						<form:formElements>
+							<form:FormElement
+								label="{viewModel>dueDate/label}"
+								visible="{= ${viewModel>type/value} !== 'P'}">
+								<form:fields>
+									<DatePicker
+										value="{
+											path:'viewModel>dueDate/value',
+											type:'sap.ui.model.type.Date',
+											formatOptions: {
+												style: 'medium',
+												strictParsing: true,
+												UTC: true
+											}
+										}"
+										valueState="{viewModel>dueDate/valueState}"
+										valueStateText="{viewModel>dueDate/valueStateText}"/>
+								</form:fields>
+							</form:FormElement>
+							<form:FormElement
+								label="{viewModel>supplierName/label}"
+								visible="{= ${viewModel>type/value} !== 'P'}">
+								<form:fields>
+									<Input
+										type="Text"
+										value="{viewModel>supplierName/value}"
+										valueState="{viewModel>supplierName/valueState}"
+										valueStateText="{viewModel>supplierName/valueStateText}"/>
+								</form:fields>
+							</form:FormElement>
+							<form:FormElement label="{viewModel>deliverTo/label}">
+								<form:fields>
+									<Input
+										type="Text"
+										value="{viewModel>deliverTo/value}"
+										valueState="{viewModel>deliverTo/valueState}"
+										valueStateText="{viewModel>deliverTo/valueStateText}"/>
+								</form:fields>
+							</form:FormElement>
+							<form:FormElement label="{viewModel>comments/label}">
+								<form:fields>
+									<TextArea
+										rows="3"
+										value="{viewModel>comments/value}"
+										valueState="{viewModel>comments/valueState}"
+										valueStateText="{viewModel>comments/valueStateText}"/>
+								</form:fields>
+							</form:FormElement>
+						</form:formElements>
+					</form:FormContainer>
+				</form:formContainers>
+			</form:Form>
+			<MessageStrip
+				class="sapUiResponsiveMargin"
+				visible="{= ${viewModel>/create/message/text} !== '' }"
+				text="{viewModel>/create/message/text}"
+				type="{viewModel>/create/message/type}"/>
+		</content>
+		<beginButton>
+			<Button
+				press="closeCreateDialog"
+				text="Cancel"/>
+		</beginButton>
+		<endButton>
+			<Button
+				type="Accept"
+				press="createItem"
+				text="Create"/>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>

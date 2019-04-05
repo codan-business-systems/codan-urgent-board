@@ -1,0 +1,149 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	class="sapUiSizeCompact" 
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	displayBlock="true">
+	<Table
+		id="tableMain"
+		width="auto"
+		mode="MultiSelect"
+		selectionChange="onTableSelectionChange"
+		class="sapUiNoMargin"
+		items="{
+			path: '/Items',
+			parameters: {
+				operationMode: 'Client',
+				threshold: 500
+			}
+		}">
+
+		<headerToolbar>
+			<Toolbar class="sapUiNoMargin">
+				<Title
+					visible="{= ${viewModel>/selectedCount} > 0 }"
+					text="{viewModel>/selectedCount} item(s) selected"/>
+				<Button
+					tooltip="{i18n>clearSelection}"
+					press="clearSelections"
+					visible="{= ${viewModel>/selectedCount} > 0 }"
+					icon="sap-icon://decline"/>
+				<Button
+					tooltip="{i18n>sendEmailForSelected}"
+					press="sendSelectedItemsEmail"
+					visible="{= ${viewModel>/selectedCount} > 0 }"
+					icon="sap-icon://email"/>
+				<Button
+					tooltip="{i18n>deleteSelected}"
+					press="confirmDeleteSelectedItems"
+					visible="{= ${viewModel>/selectedCount} > 0 }"
+					type="Reject"
+					icon="sap-icon://delete"/>
+				<Button
+					tooltip="{i18n>createNew}"
+					press="showCreateDialog"
+					visible="{= ${viewModel>/selectedCount} === 0 }"
+					type="Emphasized"
+					icon="sap-icon://create-form"/>
+				<ToolbarSpacer />
+				<Button
+					icon="sap-icon://sort"
+					visible="{= ${viewModel>/selectedCount} === 0 }"
+					tooltip="Sort columns"
+					press="toggleSortSettings"/>
+				<SearchField
+					id="searchField"
+					class="sapUiNoMarginEnd"
+					value="{viewModel>/search/value}"
+					visible="{= ${viewModel>/selectedCount} === 0 }"
+					search="onSearch"
+					width="auto">
+				</SearchField>
+				<Button
+					class="sapUiNoMarginBegin"
+					type="Emphasized"
+					icon="sap-icon://drop-down-list"
+					visible="{= ${viewModel>/selectedCount} === 0 }"
+					tooltip="Search Settings"
+					press="toggleSearchSettings"/>
+			</Toolbar>
+		</headerToolbar>
+
+		<columns>
+			<Column id="colMaterial" width="20%">
+				<Text text="Material"/>
+			</Column>
+			<Column id="colOrder">
+				<Text text="Order"/>
+			</Column>
+			<Column id="colSupplier">
+				<Text text="Supplier"/>
+			</Column>
+			<Column id="colQuantity" hAlign="Right">
+				<Text text="Quantity"/>
+			</Column>
+			<Column id="colDueDate">
+				<Text text="Due"/>
+			</Column>
+			<Column id="colContact">
+				<Text text="Contact"/>
+			</Column>
+			<Column id="colDeliverToNotes">
+				<Text text="Deliver to / Notes"/>
+			</Column>
+			<Column>
+			</Column>
+		</columns>
+
+		<items>
+			<ColumnListItem>
+				<cells>
+					<!--Use VBox and extra text over ObjectIdentifier text attribute as there is way-->
+					<!--too much space between title and text in the latter-->
+					<VBox>
+						<ObjectIdentifier title="{material}"/>
+						<Text text="{description}"/>
+					</VBox>
+					<HBox>
+						<core:Icon
+							visible="{= !!(${type}) }"
+							tooltip="{typeText}"
+							class="sapUiTinyMarginEnd"
+							src="{
+								path: 'type',
+								formatter: '.formatters.typeIconSrc'
+							}">
+						</core:Icon>
+						<Text text="{
+							parts: ['objectkey', 'line'],
+							formatter: '.formatters.orderText'
+						}"/>
+					</HBox>
+					<Text text="{supplierName}"/>
+					<ObjectNumber
+						number="{
+							parts: ['quantity', 'quantityIssued', 'unlimitedQuantity'],
+							formatter: '.formatters.combinedQuantityText'
+						}"
+						unit="{uom}"/>
+					<Text text="{ path: 'dueDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd/MM/yyyy' } }"/>
+					<Text text="{enteredByName}"/>
+					<Text text="{
+						parts: ['deliverTo', 'comments'],
+						formatter: '.formatters.deliverToAndNotesText'
+					}"/>
+					<Button
+						icon="sap-icon://overflow"
+						press="toggleItemOverflowPopover"
+						tooltip="Edit item details"/>
+				</cells>
+			</ColumnListItem>
+		</items>
+		<dependents>
+			 <core:Fragment fragmentName="codan.zurgentboard.view.SortSettings" type="XML" />
+			 <core:Fragment fragmentName="codan.zurgentboard.view.SearchSettings" type="XML" />
+			 <core:Fragment fragmentName="codan.zurgentboard.view.CreateItemDialog" type="XML" />
+		</dependents>
+	</Table>
+</core:FragmentDefinition>

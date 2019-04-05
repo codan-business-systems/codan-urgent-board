@@ -1,0 +1,143 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:form="sap.ui.layout.form"
+	xmlns:layout="sap.ui.layout"
+	xmlns:core="sap.ui.core" >
+	<ResponsivePopover
+		busy="{viewModel>/state/busy}"
+		busyIndicatorDelay="0"
+		placement="Left"
+		title="Item details">
+		<content>
+			<form:Form
+				editable="true"
+				class="editableForm">
+				<form:layout>
+					<form:ResponsiveGridLayout
+						labelSpanL="3"
+						labelSpanM="3"
+						emptySpanL="0"
+						emptySpanM="0"
+						columnsL="1"
+						columnsM="1"/>
+				</form:layout>
+				<form:formContainers>
+					<form:FormContainer>
+						<form:formElements>
+							<form:FormElement label="{viewModel>/fields/quantity/label}">
+								<form:fields>
+									<Input
+										type="Number"
+										value="{quantity}"
+										visible="{= !${unlimitedQuantity} }"
+										change="onItemFieldChange"
+										valueState="{viewModel>/fields/quantity/valueState}"
+										valueStateText="{viewModel>/fields/quantity/valueStateText}">
+										<layoutData>
+											<layout:GridData span="L2 M2 S4" />
+										</layoutData>
+									</Input>
+									<CheckBox
+										text="{viewModel>/fields/unlimitedQuantity/label}"
+										select="onItemFieldChange"
+										selected="{unlimitedQuantity}"
+										valueState="{viewModel>/fields/unlimitedQuantity/valueState}">
+										<layoutData>
+											<layout:GridData span="L2 M2 S4" />
+										</layoutData>
+									</CheckBox>
+								</form:fields>
+							</form:FormElement>
+							<form:FormElement label="{viewModel>/fields/quantityIssued/label}">
+								<form:fields>
+									<Input
+										type="Number"
+										value="{quantityIssued}"
+										change="onItemFieldChange"
+										valueState="{viewModel>/fields/quantityIssued/valueState}"
+										valueStateText="{viewModel>/fields/quantityIssued/valueStateText}">
+									</Input>
+								</form:fields>
+							</form:FormElement>
+							<form:FormElement
+								label="{viewModel>/fields/supplierName/label}"
+								visible="{= ${type} !== 'P'}">
+								<form:fields>
+									<Input
+										type="Text"
+										value="{supplierName}"
+										change="onItemFieldChange"
+										valueState="{viewModel>/fields/supplierName/valueState}"
+										valueStateText="{viewModel>/fields/supplierName/valueStateText}"/>
+								</form:fields>
+							</form:FormElement>
+							<form:FormElement
+								label="{viewModel>/fields/dueDate/label}"
+								visible="{= ${type} !== 'P'}">
+								<form:fields>
+									<DatePicker
+										change="onItemFieldChange"
+										value="{
+											path:'dueDate',
+											type:'sap.ui.model.type.Date',
+											formatOptions: {
+												style: 'medium',
+												strictParsing: true,
+												UTC: true
+											}
+										}"
+										valueState="{viewModel>/fields/dueDate/valueState}"
+										valueStateText="{viewModel>/fields/dueDate/valueStateText}"/>
+								</form:fields>
+							</form:FormElement>
+
+							<form:FormElement label="{viewModel>/fields/deliverTo/label}">
+								<form:fields>
+									<Input
+										type="Text"
+										value="{deliverTo}"
+										change="onItemFieldChange"
+										valueState="{viewModel>/fields/deliverTo/valueState}"
+										valueStateText="{viewModel>/fields/deliverTo/valueStateText}"/>
+								</form:fields>
+							</form:FormElement>
+
+							<form:FormElement label="{viewModel>/fields/comments/label}">
+								<form:fields>
+									<TextArea
+										rows="3"
+										value="{comments}"
+										change="onItemFieldChange"
+										valueState="{viewModel>/fields/comments/valueState}"
+										valueStateText="{viewModel>/fields/comments/valueStateText}"/>
+								</form:fields>
+							</form:FormElement>
+						</form:formElements>
+					</form:FormContainer>
+				</form:formContainers>
+			</form:Form>
+			<Toolbar class="sapUiSmallMarginBeginEnd">
+				<Button
+					visible="{= !${viewModel>/itemPopover/hasError} }"
+					press="sendItemEmail"
+					icon="sap-icon://email"
+					tooltip="Send email regarding this item"/>
+				<Button
+					visible="{= !${viewModel>/itemPopover/hasError} }"
+					press="confirmDeleteItem"
+					icon="sap-icon://delete"
+					type="Reject"
+					tooltip="Delete item"/>
+				<ToolbarSpacer />
+				<Button
+					visible="{= ${viewModel>/itemPopover/hasError} }"
+					press="cancelItemOverflowPopover"
+					text="Cancel"/>
+				<Button
+					visible="{= !${viewModel>/itemPopover/hasError} }"
+					press="closeItemOverflowPopover"
+					text="OK"/>
+			</Toolbar>
+		</content>
+	</ResponsivePopover>
+</core:FragmentDefinition>
