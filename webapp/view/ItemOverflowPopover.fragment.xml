@@ -29,8 +29,10 @@
 									<Input
 										type="Number"
 										value="{quantity}"
-										enabled="{viewModel>/settings/allowUpdate}"
-										visible="{= !${unlimitedQuantity} }"
+										enabled="{
+											parts: ['unlimitedQuantity', 'viewModel>/settings/allowUpdate'],
+											formatter: '.formatters.inputQuantityEnabled'
+										}"
 										change="onItemFieldChange"
 										valueState="{viewModel>/fields/quantity/valueState}"
 										valueStateText="{viewModel>/fields/quantity/valueStateText}">
@@ -63,11 +65,11 @@
 								</form:fields>
 							</form:FormElement>
 							<form:FormElement
-								label="{viewModel>/fields/supplierName/label}"
-								visible="{= ${type} !== 'P'}">
+								label="{viewModel>/fields/supplierName/label}">
 								<form:fields>
 									<Input
 										type="Text"
+										editable="{= ${type} !== 'P'}"
 										value="{supplierName}"
 										enabled="{viewModel>/settings/allowUpdate}"
 										change="onItemFieldChange"
@@ -76,11 +78,11 @@
 								</form:fields>
 							</form:FormElement>
 							<form:FormElement
-								label="{viewModel>/fields/dueDate/label}"
-								visible="{= ${type} !== 'P'}">
+								label="{viewModel>/fields/dueDate/label}" >
 								<form:fields>
 									<DatePicker
 										change="onItemFieldChange"
+										editable="{= ${type} !== 'P'}"
 										value="{
 											path:'dueDate',
 											type:'sap.ui.model.type.Date',
@@ -135,6 +137,12 @@
 					icon="sap-icon://delete"
 					type="Reject"
 					tooltip="Delete item"/>
+				<Button
+					visible="{= !${viewModel>/itemPopover/hasError} }"
+					press="navToGoodsReceipt"
+					icon="sap-icon://supplier"
+					type="Accept"
+					tooltip="Receipt Goods"/>
 				<ToolbarSpacer />
 				<Button
 					visible="{= ${viewModel>/itemPopover/hasError} }"

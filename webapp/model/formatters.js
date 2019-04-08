@@ -1,19 +1,27 @@
-sap.ui.define([
-], function () {
+sap.ui.define([], function () {
 	"use strict";
 	return {
+		inputQuantityEnabled(bUnlimitedQuantity, bUpdateAllowed) {
+			return !bUnlimitedQuantity && bUpdateAllowed;
+		},
+
 		createButtonVisible(bCreateAllowed, nItemsSelected) {
 			return bCreateAllowed === true
 				&& nItemsSelected === 0;
 		},
+
 		searchVisible(bSearchAllowed, nItemsSelected) {
 			return bSearchAllowed === true
 				&& nItemsSelected === 0;
 		},
 		combinedQuantityText(nQuantityRequired, nQuantityIssued, bUnlimitedQuantity) {
-			return `${nQuantityIssued} / ${
-				bUnlimitedQuantity ? "∞" : nQuantityRequired
-			}`;
+			if (!!nQuantityIssued && Number(nQuantityIssued) > 0) {
+				return `${nQuantityIssued} / ${
+					bUnlimitedQuantity ? "∞" : nQuantityRequired
+				}`;
+			} else {
+				return bUnlimitedQuantity ? "∞" : nQuantityRequired;
+			}			
 		},
 		deliverToAndNotesText(sDeliverTo, sNotes) {
 			const truncNotesToLen = 40;

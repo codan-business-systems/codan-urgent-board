@@ -28,8 +28,7 @@ sap.ui.define([
 					initialValue: "",
 					required: item => !item.description,
 					canSearch: true,
-					canSort: true,
-					initialSortPosition: 0
+					canSort: true
 				},
 				description: {
 					label: "Part Description",
