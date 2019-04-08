@@ -144,13 +144,23 @@ sap.ui.define([
 		},
 		
 		onTableSelectionChange() {
-			var oTable = this.byId("tableMain");
+			var oTable = this._byId("tableMain");
 			var aSelectedItems = oTable.getSelectedItems();
 			this._oViewModel.setProperty("/selectedCount", aSelectedItems.length);
 		},
 		
+		_byId(sControlId) {
+			const sComponentId = this.getId();
+			const sFullId = `${sComponentId}--${sControlId}`;
+			const oControl = sap.ui.getCore().byId(sFullId);
+			if (!oControl) {
+				throw new Error(`Unable to get reference to control ${sFullId}`);
+			}
+			return oControl;
+		},
+		
 		toggleSearchSettings(oEvent) {
-			var oPopover = this.byId("searchSettingsPopover");
+			var oPopover = this._byId("searchSettingsPopover");
 			if (oPopover.isOpen()) {
 				oPopover.close();
 			} else {
@@ -159,7 +169,7 @@ sap.ui.define([
 		},
 		
 		toggleSortSettings(oEvent) {
-			var oPopover = this.byId("sortSettingsPopover");
+			var oPopover = this._byId("sortSettingsPopover");
 			if (oPopover.isOpen()) {
 				oPopover.close();
 			} else {
@@ -169,12 +179,12 @@ sap.ui.define([
 		
 		showCreateDialog() {
 			this._resetCreateForm();
-			var oDialog = this.byId("createItemDialog");
+			var oDialog = this._byId("createItemDialog");
 			oDialog.open();
 		},
 		
 		sendSelectedItemsEmail() {
-			const oTable = this.byId("tableMain");
+			const oTable = this._byId("tableMain");
 			const oSelectedItems = oTable.getSelectedItems();
 			
 			// Testing reveals that large number of items selected (e.g. 10 or 51) doesn't work - no feedback or response
@@ -235,7 +245,7 @@ sap.ui.define([
 		},
 		
 		clearSelections() {
-			this.byId("tableMain").removeSelections(true);
+			this._byId("tableMain").removeSelections(true);
 			this.onTableSelectionChange();
 		},
 		
@@ -364,7 +374,7 @@ sap.ui.define([
 		},
 		
 		closeCreateDialog() {
-			this.byId("createItemDialog").close();
+			this._byId("createItemDialog").close();
 		},
 		
 		createItem() {
@@ -484,7 +494,7 @@ sap.ui.define([
 			}
 			
 			// Apply filter
-			var oTable = this.byId("tableMain");
+			var oTable = this._byId("tableMain");
 			var oBinding = oTable.getBinding("items");
 			oBinding.filter(aAllFilters);
 		},
@@ -610,7 +620,7 @@ sap.ui.define([
 		},
 		
 		confirmDeleteSelectedItems() {
-			var oTable = this.byId("tableMain");
+			var oTable = this._byId("tableMain");
 			var aSelectedItems = oTable.getSelectedItems();
 			MessageBox.confirm(`Are you sure you want to delete ${aSelectedItems.length} item(s)?`, {
 				onClose: (oAction) => {
@@ -801,7 +811,7 @@ sap.ui.define([
 				}));
 			
 			// Apply sort
-			var oTable = this.byId("tableMain");
+			var oTable = this._byId("tableMain");
 			var oBinding = oTable.getBinding("items");
 			oBinding.sort(aSorters);
 		}
