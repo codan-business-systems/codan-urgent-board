@@ -34,7 +34,26 @@ sap.ui.define([
 	return UIComponent.extend("codan.zurgentboard.Component", {
 		metadata: {
 			manifest: "json",
-			includes: ["css/style.css"]
+			includes: ["css/style.css"],
+			properties: {
+				allowCreate: {
+					type: "string",
+					defaultValue: "true"
+				},
+				allowUpdate: {
+					type: "string",
+					defaultValue: "true"
+				},
+				materials: {
+					type: "string[]",
+					defaultValue: []
+				},
+				descriptions: {
+					type: "string[]",
+					group: "Misc",
+					defaultValue: []
+				}
+			}
 		},
 		
 		formatters: formatters,
@@ -64,6 +83,64 @@ sap.ui.define([
 			// Initialize search and sort fields
 			this._initSearchFields();
 			this._initSortFields();
+		},
+		
+		setAllowCreate(allow) {
+			this.setProperty("allowCreate", allow);
+			const bAllow = (allow === "true" || allow === true);
+			this._oViewModel.setProperty("/settings/allowCreate", bAllow);
+			this._oViewModel.refresh();
+		}, 
+		
+		setAllowUpdate(allow) {
+			this.setProperty("allowUpdate", allow);
+			const bAllow = (allow === "true" || allow === true);
+			this._oViewModel.setProperty("/settings/allowUpdate", bAllow);
+			this._oViewModel.refresh();
+		},
+		
+		setMaterials(aMaterials) {
+			this.setProperty("materials", aMaterials);
+			this._filterTableByProps();
+		},
+		
+		setDescriptions(aDescriptions) {
+			this.setProperty("descriptions", aDescriptions);
+			this._filterTableByProps();
+		},
+		
+		_filterTableByProps() {
+			// Disable search - incompatible with preset props-based filters
+			// and probably not useful anyway given table contents will be
+			// reduced to a few matching materials
+			this._oViewModel.setProperty("/settings/allowSearch", false);
+			this._oViewModel.refresh();
+			
+			// Build material filters from numbers
+			const aMaterialFilters = this
+				.getMaterials()
+				.map(sMaterial => new Filter({
+					path: "material",
+					operator: FilterOperator.EQ,
+					value1: sMaterial
+				}));
+			
+			const aDescriptionFilters = this
+				.getDescriptions()
+				.map(sDescription => new Filter({
+					path: "description",
+					operator: FilterOperator.EQ,
+					value1: sDescription
+				}));
+				
+			const oCombinedFilter = new Filter({
+				filters: aMaterialFilters.concat(aDescriptionFilters),
+				and: false // use "or"
+			});
+			
+			const oTable = this._byId("tableMain");
+			const oItemBinding = oTable.getBinding("items");
+			oItemBinding.filter([oCombinedFilter]);
 		},
 	
 		/**

@@ -137,6 +137,11 @@ sap.ui.define([
 			sort: {
 				fields: [], // populated in _initSortFields()
 				activeFieldCount: 0 // populated in _updateSortActiveFieldCount()
+			},
+			settings: {
+				allowCreate: true,
+				allowUpdate: true,
+				allowSearch: true 
 			}
 		}
 	};

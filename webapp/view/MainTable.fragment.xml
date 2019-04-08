@@ -43,7 +43,10 @@
 				<Button
 					tooltip="{i18n>createNew}"
 					press="showCreateDialog"
-					visible="{= ${viewModel>/selectedCount} === 0 }"
+					visible="{
+						parts: ['viewModel>/settings/allowCreate', 'viewModel>/selectedCount'],
+						formatter: '.formatters.createButtonVisible'
+					}"
 					type="Emphasized"
 					icon="sap-icon://create-form"/>
 				<ToolbarSpacer />
@@ -56,7 +59,10 @@
 					id="searchField"
 					class="sapUiNoMarginEnd"
 					value="{viewModel>/search/value}"
-					visible="{= ${viewModel>/selectedCount} === 0 }"
+					visible="{
+						parts: ['viewModel>/settings/allowSearch', 'viewModel>/selectedCount'],
+						formatter: '.formatters.searchVisible'
+					}"
 					search="onSearch"
 					width="auto">
 				</SearchField>
@@ -64,7 +70,10 @@
 					class="sapUiNoMarginBegin"
 					type="Emphasized"
 					icon="sap-icon://drop-down-list"
-					visible="{= ${viewModel>/selectedCount} === 0 }"
+					visible="{
+						parts: ['viewModel>/settings/allowSearch', 'viewModel>/selectedCount'],
+						formatter: '.formatters.searchVisible'
+					}"
 					tooltip="Search Settings"
 					press="toggleSearchSettings"/>
 			</Toolbar>

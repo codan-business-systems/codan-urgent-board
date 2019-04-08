@@ -2,6 +2,14 @@ sap.ui.define([
 ], function () {
 	"use strict";
 	return {
+		createButtonVisible(bCreateAllowed, nItemsSelected) {
+			return bCreateAllowed === true
+				&& nItemsSelected === 0;
+		},
+		searchVisible(bSearchAllowed, nItemsSelected) {
+			return bSearchAllowed === true
+				&& nItemsSelected === 0;
+		},
 		combinedQuantityText(nQuantityRequired, nQuantityIssued, bUnlimitedQuantity) {
 			return `${nQuantityIssued} / ${
 				bUnlimitedQuantity ? "∞" : nQuantityRequired
