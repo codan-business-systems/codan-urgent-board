@@ -44,6 +44,10 @@ sap.ui.define([
 					type: "string",
 					defaultValue: "true"
 				},
+				allowNavToGR: {
+					type: "string",
+					defaultValue: "true"
+				},
 				materials: {
 					type: "string[]",
 					defaultValue: []
@@ -129,6 +133,13 @@ sap.ui.define([
 			this._oViewModel.refresh();
 		},
 		
+		setAllowNavToGR(allow) {
+			this.setProperty("allowNavToGR", allow);
+			const bAllow = (allow === "true" || allow === true);
+			this._oViewModel.setProperty("/settings/allowNavToGR", bAllow);
+			this._oViewModel.refresh();
+		},
+		
 		setMaterials(aMaterials) {
 			this.setProperty("materials", aMaterials);
 			this._filterTableByProps();
@@ -140,6 +151,8 @@ sap.ui.define([
 		},
 		
 		_filterTableByProps() {
+			this.clearSelections();
+			
 			// Disable search - incompatible with preset props-based filters
 			// and probably not useful anyway given table contents will be
 			// reduced to a few matching materials
@@ -406,15 +419,15 @@ sap.ui.define([
 			var aLines = [
 				`Material:  ${oData.material} (${oData.description})`,
 				`Quantity required:  ${
-						oData.unlimitedQuantity ? 'unlimited' : oData.quantity
+						oData.unlimitedQuantity ? "unlimited" : oData.quantity
 					} ${
-						oData.unlimitedQuantity ? '' : oData.uom
+						oData.unlimitedQuantity ? "" : oData.uom
 					}`,
 				`Quantity issued:  ${oData.quantityIssued} ${oData.uom}`,
 				`Quantity remaining:  ${
-						oData.unlimitedQuantity ? 'unlimited' : oData.quantity
+						oData.unlimitedQuantity ? "unlimited" : oData.quantity
 					} ${
-						oData.unlimitedQuantity ? '' : oData.uom
+						oData.unlimitedQuantity ? "" : oData.uom
 					}`,
 				`Due:  ${oData.dueDate}`,
 				`Contact:  ${oData.enteredByName}`,
@@ -640,6 +653,8 @@ sap.ui.define([
 		},
 
 		onSearch() {
+			this.clearSelections();
+
 			var aSearchFields = this._oViewModel.getProperty("/search/fields");
 			var sSearchValue = this._oViewModel.getProperty("/search/value");
 			var dSearchDateFrom = this._oViewModel.getProperty("/searchDateFrom");
@@ -1091,7 +1106,7 @@ sap.ui.define([
 		},
 
 		navToGoodsReceiptSelected() {
-			var oTable = this.byId("tableMain");
+			var oTable = this._byId("tableMain");
 			var aSelectedItems = oTable.getSelectedItems(),
 				sPurchaseOrders = "",
 				oNav = sap.ushell.Container.getService("CrossApplicationNavigation"),

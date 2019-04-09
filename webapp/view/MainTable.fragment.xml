@@ -42,7 +42,10 @@
 					type="Reject"
 					icon="sap-icon://delete"/>
 				<Button
-					visible="{= ${viewModel>/selectedCount} > 0 }"
+					visible="{
+						parts: ['viewModel>/selectedCount', 'viewModel>/settings/allowNavToGR'],
+						formatter: '.formatters.navToGRButtonVisible'
+					}"
 					tooltip="{i18n>goodsReceiptSelected}"
 					press="navToGoodsReceiptSelected"
 					type="Accept"

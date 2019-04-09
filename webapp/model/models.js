@@ -140,7 +140,8 @@ sap.ui.define([
 			settings: {
 				allowCreate: true,
 				allowUpdate: true,
-				allowUserFiltering: true 
+				allowUserFiltering: true,
+				allowNavToGR: true
 			}
 		}
 	};
