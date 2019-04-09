@@ -1041,7 +1041,7 @@ sap.ui.define([
 
 		// Save the user's settings choices via the oData service
 		_persistSortSettings(aSortFields) {
-			var model = this.getView().getModel("common");
+			var model = this.getModel("common");
 
 			if (!model) {
 				return;
