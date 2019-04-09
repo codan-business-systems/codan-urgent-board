@@ -82,7 +82,37 @@ sap.ui.define([
 			
 			// Initialize search and sort fields
 			this._initSearchFields();
-			this._initSortFields();
+
+			// Check if we have default sort values stored in the backend
+			this._applyDefaultSortValues();
+		},
+		
+		_applyDefaultSortValues() {
+			const oCommonModel = this.getModel("common");
+			this._setBusy(true);
+			oCommonModel.metadataLoaded().then(() => {
+				oCommonModel.read("/AppParameters", {
+					filters: [new Filter({
+						path: "application",
+						operator: FilterOperator.EQ,
+						value1: "URGENT_BOARD"
+					})],
+					success: (oData) => {
+						const nResultNdx = oData.results.findIndex((oRes) => oRes.name === "SORT");
+
+						if (nResultNdx >= 0) {
+							this._initSortFields(oData.results[nResultNdx].value);
+						} else {
+							this._initSortFields();
+						}
+						this._setBusy(false);
+					},
+					error: () => {
+						this._initSortFields();
+						this._setBusy(false);
+					}
+				});
+			});
 		},
 		
 		setAllowCreate(allow) {
@@ -175,9 +205,22 @@ sap.ui.define([
 		/**
 		 * Builds property 'sort/fields' in view model based on field
 		 * metadata in property '/fields'
+		 * 
+		 *  Optional sStartValues => Default sort values (eg on load from backend)
 		 */
-		_initSortFields() {
+		_initSortFields(sStartValues) {
 			var oFields = this._oViewModel.getProperty("/fields");
+			var aStartValues = sStartValues ? sStartValues.split(";") : [];
+			aStartValues = aStartValues.map((sStartValue) => {
+				var aParts = sStartValue.split("(");
+				if (aParts.length < 2) {
+					return "";
+				}
+				return {
+					path: aParts[0],
+					direction: aParts[1][0]
+				};
+			});			
 			var aSortFields = Object.entries(oFields)
 				// Filter out unsortable fields
 				.filter(([, oField]) => oField.canSort)
@@ -191,10 +234,32 @@ sap.ui.define([
 					canMoveUp: false,	// Will be set in _setSortFieldCanMove()
 					canMoveDown: false	// Will be set in _setSortFieldCanMove()
 				}))
+				// Check if a default setting exists
+				.map((oField) => {
+					var startValueIndex = aStartValues.findIndex((o) => o.path === oField.path.toUpperCase());
+
+					if (startValueIndex >= 0) {
+						oField.sortAscending = aStartValues[startValueIndex].direction === "A";
+						oField.sortDescending = aStartValues[startValueIndex].direction !== "A";
+						oField.initialPosition = startValueIndex;
+					}
+					return oField;
+				})				
 				// Sort by initial sort position
-				.sort((oA, oB) => oA.initialPosition - oB.initialPosition)
+				.sort((oA, oB) => {
+					if (typeof oA.initialPosition === "undefined" && typeof oB.initialPosition === "undefined") {
+						return 0;
+					} else if (typeof oA.initialPosition === "undefined") {
+						return 1;
+					} else if (typeof oB.initialPosition === "undefined") {
+						return -1;
+					} else {
+						return oA.initialPosition - oB.initialPosition;
+					}
+				})
 				// Set 'canMoveUp' and 'canMoveDown'
 				.map(this._setSortFieldCanMove);
+			this._updateTableSort(aSortFields);
 			this._oViewModel.setProperty("/sort/fields", aSortFields);
 			this._updateSortActiveFieldCount(aSortFields);
 		},
@@ -482,7 +547,6 @@ sap.ui.define([
 			});
 		},
 		
-		
 		toggleItemOverflowPopover(oEvent) {
 			var oButton = oEvent.getSource();
 			var oItem = utils.findControlInParents("sap.m.ColumnListItem", oButton);
@@ -542,9 +606,44 @@ sap.ui.define([
 			}
 		},
 		
+		validateDateRange(event) {
+			if (event.getParameter("valid")) {
+				event.getSource().setValueState(sap.ui.core.ValueState.None);
+				this.onSearch();
+			} else {
+				event.getSource().setValueState(sap.ui.core.ValueState.Error);
+			}
+		},
+
+		setDueInPast() {
+			this._oViewModel.setProperty("/searchDateFrom", new Date("01/01/2000"));	
+			this._oViewModel.setProperty("/searchDateTo", new Date());
+			this.onSearch();
+		},
+
+		setDueToday() {
+			this._oViewModel.setProperty("/searchDateFrom", new Date());
+			this.onSearch();
+		},
+
+		setDueInFuture() {
+			var today = new Date();
+			this._oViewModel.setProperty("/searchDateFrom", new Date());
+			this._oViewModel.setProperty("/searchDateTo", new Date(today.getFullYear() + 2, today.getMonth(), today.getDate()));
+			this.onSearch();
+		},
+
+		clearDateSelection() {
+			this._oViewModel.setProperty("/searchDateFrom", null);
+			this._oViewModel.setProperty("/searchDateTo", null);
+			this.onSearch();
+		},
+
 		onSearch() {
 			var aSearchFields = this._oViewModel.getProperty("/search/fields");
 			var sSearchValue = this._oViewModel.getProperty("/search/value");
+			var dSearchDateFrom = this._oViewModel.getProperty("/searchDateFrom");
+			var dSearchDateTo = this._oViewModel.getProperty("/searchDateTo") || new Date(dSearchDateFrom);
 			
 			// Build filters for each active search field
 			var aAllFilters = [];
@@ -569,7 +668,19 @@ sap.ui.define([
 				});
 				aAllFilters.push(oCombinedFilter);
 			}
-			
+
+			if (dSearchDateFrom) {
+				dSearchDateTo.setHours(23);
+				dSearchDateTo.setMinutes(59);
+				dSearchDateTo.setSeconds(59);
+				aAllFilters.push(new Filter({
+					path: "dueDate",
+					operator: FilterOperator.BT,
+					value1: dSearchDateFrom,
+					value2: dSearchDateTo
+				}));
+			}			
+
 			// Apply filter
 			var oTable = this._byId("tableMain");
 			var oBinding = oTable.getBinding("items");
@@ -748,8 +859,8 @@ sap.ui.define([
 			if (oData && oData.__batchResponses) {
 				for (var x = 0; x < oData.__batchResponses.length; x++) {
 					var oResponse = oData.__batchResponses[x];
-					if ( (oResponse.statusCode && oResponse.statusCode !== "200")
-						|| (!oResponse.statusCode && oResponse.response && oResponse.response.statusCode !== "200")) {
+					if ((oResponse.statusCode && oResponse.statusCode !== "200") || (!oResponse.statusCode && oResponse.response && oResponse.response
+							.statusCode !== "200")) {
 						try {
 							var response = JSON.parse(oResponse.response.body);
 							if (response.error && response.error.message) {
@@ -879,19 +990,137 @@ sap.ui.define([
 		},
 		
 		_updateTableSort(aSortFields) {
+			// Some properties need custom sort functions - these are defined below
+			// Date sort is required due to bug in current version of UI5 where 
+			// if a date value is blank the item is not sorted.
+			// Note that this only seems to be a problem with 1.38.6 => seems to be fixed
+			// in future versions
+			const fDateSort = (d1, d2) => {
+				if (d1 === d2) {
+					return 0;
+				}
+
+				if (!d1 || !d2) {
+					return !d1 ? -1 : 1;
+				} else {
+					if (d1 === d2) {
+						return 0;
+					} else {
+						return d1 < d2 ? -1 : 1;
+					}
+				}
+			};
+
+			// Function to determine which comparator function to use
+			const getComparator = (path) => {
+				switch(path) {
+					case "dueDate":
+						return fDateSort;
+					default:
+						return null;
+				}	
+			};
+	
 			// Build sorters for each active sort field
 			var aSorters = aSortFields
 				.filter(oSortField => oSortField.sortAscending || oSortField.sortDescending)
 				.map(oSortField => new Sorter({
 					path: oSortField.path,
-					descending: oSortField.sortDescending
+					descending: oSortField.sortDescending,
+					comparator: getComparator(oSortField.path)					
 				}));
 			
 			// Apply sort
 			var oTable = this._byId("tableMain");
 			var oBinding = oTable.getBinding("items");
 			oBinding.sort(aSorters);
+
+			// Persist sort settings
+			this._persistSortSettings(aSortFields);
+		},
+
+		// Save the user's settings choices via the oData service
+		_persistSortSettings(aSortFields) {
+			var model = this.getModel("common");
+
+			if (!model) {
+				return;
+			}
+
+			const sSortParams = aSortFields.map((oSortField) => {
+				if (oSortField.sortAscending) {
+					return oSortField.path.toUpperCase() + "(A);";
+				} else if (oSortField.sortDescending) {
+					return oSortField.path.toUpperCase() + "(D);";
+				} else {
+					return "";
+				}
+			}).join("");
+
+			model.create("/AppParameters",{
+				application: "URGENT_BOARD",
+				name: "SORT",
+				value: sSortParams			
+			});
+
+			model.metadataLoaded().then(() => model.submitChanges());
+
+		},
+
+		navToGoodsReceipt(event) {
+			const oSourceObject = event.getSource().getBindingContext().getObject(),
+				  sPurchaseOrder = oSourceObject.type === "P" ? oSourceObject.objectkey : "",
+				  oNav = sap.ushell.Container.getService("CrossApplicationNavigation");
+
+			var hash = (oNav && oNav.hrefForExternal({
+				target : {
+					semanticObject: "GoodsReceipt",
+					action: "create"
+				},
+				params: sPurchaseOrder ? {
+					"purchaseOrder": sPurchaseOrder
+				} : {}
+			})) || "";
+
+			oNav.toExternal({
+				target: {
+					shellHash: hash
+				}
+			});
+
+		},
+
+		navToGoodsReceiptSelected() {
+			var oTable = this.byId("tableMain");
+			var aSelectedItems = oTable.getSelectedItems(),
+				sPurchaseOrders = "",
+				oNav = sap.ushell.Container.getService("CrossApplicationNavigation"),
+				oModel = this._oODataModel;
+
+			aSelectedItems
+				.map((oTableItem) => oTableItem.getBindingContextPath())
+				.map((sPath) => oModel.getProperty(sPath))
+				.forEach((oItem) => { 
+					if (oItem.type === "P") {
+						sPurchaseOrders = sPurchaseOrders ? sPurchaseOrders + ";" + oItem.objectkey : oItem.objectkey;
+					}
+				});
+
+			var hash = (oNav && oNav.hrefForExternal({
+				target : {
+					semanticObject: "GoodsReceipt",
+					action: "create"
+				},
+				params: sPurchaseOrders ? {
+					"purchaseOrder": sPurchaseOrders
+				} : {}
+			})) || "";
+
+			oNav.toExternal({
+				target: {
+					shellHash: hash
+				}
+			});
 		}
-	 
 	});
 });
