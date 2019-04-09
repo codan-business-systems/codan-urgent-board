@@ -1103,39 +1103,6 @@ sap.ui.define([
 				}
 			});
 
-		},
-
-		navToGoodsReceiptSelected() {
-			var oTable = this._byId("tableMain");
-			var aSelectedItems = oTable.getSelectedItems(),
-				sPurchaseOrders = "",
-				oNav = sap.ushell.Container.getService("CrossApplicationNavigation"),
-				oModel = this._oODataModel;
-
-			aSelectedItems
-				.map((oTableItem) => oTableItem.getBindingContextPath())
-				.map((sPath) => oModel.getProperty(sPath))
-				.forEach((oItem) => { 
-					if (oItem.type === "P") {
-						sPurchaseOrders = sPurchaseOrders ? sPurchaseOrders + ";" + oItem.objectkey : oItem.objectkey;
-					}
-				});
-
-			var hash = (oNav && oNav.hrefForExternal({
-				target : {
-					semanticObject: "GoodsReceipt",
-					action: "create"
-				},
-				params: sPurchaseOrders ? {
-					"purchaseOrder": sPurchaseOrders
-				} : {}
-			})) || "";
-
-			oNav.toExternal({
-				target: {
-					shellHash: hash
-				}
-			});
 		}
 	});
 });
