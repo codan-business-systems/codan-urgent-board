@@ -10,7 +10,7 @@ sap.ui.define([], function () {
 				&& nItemsSelected === 0;
 		},
 
-		searchVisible(bSearchAllowed, nItemsSelected) {
+		userFilterOrSortOptionVisible(bSearchAllowed, nItemsSelected) {
 			return bSearchAllowed === true
 				&& nItemsSelected === 0;
 		},

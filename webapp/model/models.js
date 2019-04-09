@@ -140,7 +140,7 @@ sap.ui.define([
 			settings: {
 				allowCreate: true,
 				allowUpdate: true,
-				allowSearch: true 
+				allowUserFiltering: true 
 			}
 		}
 	};
