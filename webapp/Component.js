@@ -84,9 +84,11 @@ sap.ui.define([
 			this._initSearchFields();
 
 			// Check if we have default sort values stored in the backend
-			var that = this;
-
-			const oCommonModel = this.getOwnerComponent().getModel("common");
+			this._initCommonModel();
+		},
+		
+		_initCommonModel() {
+			const oCommonModel = this.getModel("common");
 			this._setBusy(true);
 			oCommonModel.metadataLoaded().then(() => {
 				oCommonModel.read("/AppParameters", {
@@ -99,14 +101,14 @@ sap.ui.define([
 						const nResultNdx = oData.results.findIndex((oRes) => oRes.name === "SORT");
 
 						if (nResultNdx >= 0) {
-							that._initSortFields(oData.results[nResultNdx].value);
+							this._initSortFields(oData.results[nResultNdx].value);
 						} else {
-							that._initSortFields();
+							this._initSortFields();
 						}
 						this._setBusy(false);
 					},
 					error: () => {
-						that._initSortFields();
+						this._initSortFields();
 						this._setBusy(false);
 					}
 				});
