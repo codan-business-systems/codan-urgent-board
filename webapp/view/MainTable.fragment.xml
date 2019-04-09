@@ -42,15 +42,6 @@
 					type="Reject"
 					icon="sap-icon://delete"/>
 				<Button
-					visible="{
-						parts: ['viewModel>/selectedCount', 'viewModel>/settings/allowNavToGR'],
-						formatter: '.formatters.navToGRButtonVisible'
-					}"
-					tooltip="{i18n>goodsReceiptSelected}"
-					press="navToGoodsReceiptSelected"
-					type="Accept"
-					icon="sap-icon://supplier"/>				
-				<Button
 					tooltip="{i18n>createNew}"
 					press="showCreateDialog"
 					visible="{
