@@ -82,7 +82,7 @@ sap.ui.define([
 			this._oViewModel = this.getModel("viewModel");
 			
 			//Initialize view model data
-			this._oViewModel.setData(models.viewModelData);
+			this._oViewModel.setData(models.createViewModelData());
 			
 			// Initialize search and sort fields
 			this._initSearchFields();

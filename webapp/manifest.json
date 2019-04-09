@@ -94,8 +94,7 @@
 					"defaultBindingMode": "OneWay",
 					"defaultCountMode": "Request"
 				},
-				"dataSource": "Z_COMMON_SRV",
-				"preload": true
+				"dataSource": "Z_COMMON_SRV"
 			}
 		},
 		"resources": {
