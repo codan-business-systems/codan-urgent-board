@@ -143,7 +143,7 @@ sap.ui.define([
 			// Disable search - incompatible with preset props-based filters
 			// and probably not useful anyway given table contents will be
 			// reduced to a few matching materials
-			this._oViewModel.setProperty("/settings/allowSearch", false);
+			this._oViewModel.setProperty("/settings/allowUserFiltering", false);
 			this._oViewModel.refresh();
 			
 			// Build material filters from numbers

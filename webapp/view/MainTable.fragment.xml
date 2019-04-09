@@ -21,29 +21,30 @@
 
 		<headerToolbar>
 			<Toolbar class="sapUiNoMargin">
+				<!--Selected items toolbar controls - visible when rows selected -->
 				<Title
 					visible="{= ${viewModel>/selectedCount} > 0 }"
 					text="{viewModel>/selectedCount} item(s) selected"/>
 				<Button
+					visible="{= ${viewModel>/selectedCount} > 0 }"
 					tooltip="{i18n>clearSelection}"
 					press="clearSelections"
-					visible="{= ${viewModel>/selectedCount} > 0 }"
 					icon="sap-icon://decline"/>
 				<Button
+					visible="{= ${viewModel>/selectedCount} > 0 }"
 					tooltip="{i18n>sendEmailForSelected}"
 					press="sendSelectedItemsEmail"
-					visible="{= ${viewModel>/selectedCount} > 0 }"
 					icon="sap-icon://email"/>
 				<Button
+					visible="{= ${viewModel>/selectedCount} > 0 }"
 					tooltip="{i18n>deleteSelected}"
 					press="confirmDeleteSelectedItems"
-					visible="{= ${viewModel>/selectedCount} > 0 }"
 					type="Reject"
 					icon="sap-icon://delete"/>
 				<Button
+					visible="{= ${viewModel>/selectedCount} > 0 }"
 					tooltip="{i18n>goodsReceiptSelected}"
 					press="navToGoodsReceiptSelected"
-					visible="{= ${viewModel>/selectedCount} > 0 }"
 					type="Accept"
 					icon="sap-icon://supplier"/>				
 				<Button
@@ -55,15 +56,26 @@
 					}"
 					type="Emphasized"
 					icon="sap-icon://create-form"/>
+
 				<ToolbarSpacer />
+				
+				<!--User sorting/filtering options - visible when nothing selected
+				    and user filtering/sorting is allowed -->
 				<Button
 					icon="sap-icon://sort"
-					visible="{= ${viewModel>/selectedCount} === 0 }"
+					visible="{
+						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
+						formatter: '.formatters.userFilterOrSortOptionVisible'
+					}"
 					tooltip="Sort columns"
 					press="toggleSortSettings"
 					type="Emphasized"/>
 				<DateRangeSelection 
 					dateValue="{viewModel>/searchDateFrom}"
+					visible="{
+						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
+						formatter: '.formatters.userFilterOrSortOptionVisible'
+					}"
 					secondDateValue="{viewModel>/searchDateTo}"
 					change="validateDateRange"
 					valueStateText="Enter in the format dd/MM/yyyy - dd/MM/yyyy"
@@ -72,43 +84,59 @@
 					displayFormat="dd/MM/yyyy"/>
 				<Button
 					tooltip="Due In Past"
+					visible="{
+						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
+						formatter: '.formatters.userFilterOrSortOptionVisible'
+					}"
 					icon="sap-icon://past"
 					press="setDueInPast"
 					type="Emphasized"/>
 				<Button
 					tooltip="Due Today"
+					visible="{
+						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
+						formatter: '.formatters.userFilterOrSortOptionVisible'
+					}"
 					icon="sap-icon://present"
 					press="setDueToday"
 					type="Emphasized"/>
 				<Button
 					tooltip="Due In Future"
+					visible="{
+						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
+						formatter: '.formatters.userFilterOrSortOptionVisible'
+					}"
 					icon="sap-icon://future"
 					press="setDueInFuture"
 					type="Emphasized"/>	
 				<Button
 					tooltip="All Dates"
+					visible="{
+						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
+						formatter: '.formatters.userFilterOrSortOptionVisible'
+					}"
 					icon="sap-icon://history"
 					press="clearDateSelection"
 					type="Emphasized"/>
 				<SearchField
 					id="searchField"
+					visible="{
+						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
+						formatter: '.formatters.userFilterOrSortOptionVisible'
+					}"
 					class="sapUiNoMarginEnd"
 					value="{viewModel>/search/value}"
-					visible="{
-						parts: ['viewModel>/settings/allowSearch', 'viewModel>/selectedCount'],
-						formatter: '.formatters.searchVisible'
-					}"
 					search="onSearch"
 					width="auto">
 				</SearchField>
 				<Button
 					class="sapUiNoMarginBegin"
+					visible="{
+						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
+						formatter: '.formatters.userFilterOrSortOptionVisible'
+					}"
 					type="Emphasized"
 					icon="sap-icon://drop-down-list"
-					visible="{
-						parts: ['viewModel>/settings/allowSearch', 'viewModel>/selectedCount'],
-						formatter: '.formatters.searchVisible'
-					}"
 					tooltip="Search Settings"
 					press="toggleSearchSettings"/>
 			</Toolbar>
