@@ -138,7 +138,10 @@
 					type="Reject"
 					tooltip="Delete item"/>
 				<Button
-					visible="{= !${viewModel>/itemPopover/hasError} }"
+					visible="{
+						parts: ['viewModel>/itemPopover/hasError', 'viewModel>/settings/allowNavToGR'],
+						formatter: '.formatters.navToGRButtonVisible'
+					}"
 					press="navToGoodsReceipt"
 					icon="sap-icon://supplier"
 					type="Accept"
