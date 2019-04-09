@@ -84,10 +84,10 @@ sap.ui.define([
 			this._initSearchFields();
 
 			// Check if we have default sort values stored in the backend
-			this._initCommonModel();
+			this._applyDefaultSortValues();
 		},
 		
-		_initCommonModel() {
+		_applyDefaultSortValues() {
 			const oCommonModel = this.getModel("common");
 			this._setBusy(true);
 			oCommonModel.metadataLoaded().then(() => {
