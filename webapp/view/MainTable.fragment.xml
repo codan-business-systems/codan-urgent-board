@@ -210,6 +210,7 @@
 			 <core:Fragment fragmentName="codan.zurgentboard.view.SortSettings" type="XML" />
 			 <core:Fragment fragmentName="codan.zurgentboard.view.SearchSettings" type="XML" />
 			 <core:Fragment fragmentName="codan.zurgentboard.view.CreateItemDialog" type="XML" />
+			 <core:Fragment fragmentName="codan.zurgentboard.view.SendEmailDialog" type="XML"/>
 		</dependents>
 	</Table>
 </core:FragmentDefinition>

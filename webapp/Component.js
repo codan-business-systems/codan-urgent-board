@@ -28,7 +28,8 @@ sap.ui.define([
 	"sap/ui/core/ValueState",
 	"sap/ui/model/Sorter",
 	"codan/z_ie11_polyfill/Component" // Load polyfills for IE11
-], function (UIComponent, Device, models, Filter, FilterOperator, MessageBox, MessageToast, MessageType, utils, formatters, ValueState, Sorter) {
+], function (UIComponent, Device, models, Filter, FilterOperator, MessageBox, MessageToast, MessageType, utils, formatters, ValueState,
+	Sorter) {
 	"use strict";
 
 	return UIComponent.extend("codan.zurgentboard.Component", {
@@ -59,12 +60,12 @@ sap.ui.define([
 				}
 			}
 		},
-		
+
 		formatters: formatters,
-		
+
 		_oViewModel: null, // Defined in manifest.json, set in init()
 		_oODataModel: null, // Defined in manifest.json, set in init()
-		
+
 		/**
 		 * Lifecyle method: called on component initialization
 		 * 
@@ -76,21 +77,21 @@ sap.ui.define([
 
 			// set the device model
 			this.setModel(models.createDeviceModel(), "device");
-			
+
 			// Store references to view model and odatamodel which are used frequently
 			this._oODataModel = this.getModel();
 			this._oViewModel = this.getModel("viewModel");
-			
+
 			//Initialize view model data
 			this._oViewModel.setData(models.createViewModelData());
-			
+
 			// Initialize search and sort fields
 			this._initSearchFields();
 
 			// Check if we have default sort values stored in the backend
 			this._applyDefaultSortValues();
 		},
-		
+
 		_applyDefaultSortValues() {
 			const oCommonModel = this.getModel("common");
 			this._setBusy(true);
@@ -118,47 +119,47 @@ sap.ui.define([
 				});
 			});
 		},
-		
+
 		setAllowCreate(allow) {
 			this.setProperty("allowCreate", allow);
 			const bAllow = (allow === "true" || allow === true);
 			this._oViewModel.setProperty("/settings/allowCreate", bAllow);
 			this._oViewModel.refresh();
-		}, 
-		
+		},
+
 		setAllowUpdate(allow) {
 			this.setProperty("allowUpdate", allow);
 			const bAllow = (allow === "true" || allow === true);
 			this._oViewModel.setProperty("/settings/allowUpdate", bAllow);
 			this._oViewModel.refresh();
 		},
-		
+
 		setAllowNavToGR(allow) {
 			this.setProperty("allowNavToGR", allow);
 			const bAllow = (allow === "true" || allow === true);
 			this._oViewModel.setProperty("/settings/allowNavToGR", bAllow);
 			this._oViewModel.refresh();
 		},
-		
+
 		setMaterials(aMaterials) {
 			this.setProperty("materials", aMaterials);
 			this._filterTableByProps();
 		},
-		
+
 		setDescriptions(aDescriptions) {
 			this.setProperty("descriptions", aDescriptions);
 			this._filterTableByProps();
 		},
-		
+
 		_filterTableByProps() {
 			this.clearSelections();
-			
+
 			// Disable search - incompatible with preset props-based filters
 			// and probably not useful anyway given table contents will be
 			// reduced to a few matching materials
 			this._oViewModel.setProperty("/settings/allowUserFiltering", false);
 			this._oViewModel.refresh();
-			
+
 			// Build material filters from numbers
 			const aMaterialFilters = this
 				.getMaterials()
@@ -167,7 +168,7 @@ sap.ui.define([
 					operator: FilterOperator.EQ,
 					value1: sMaterial
 				}));
-			
+
 			const aDescriptionFilters = this
 				.getDescriptions()
 				.map(sDescription => new Filter({
@@ -175,17 +176,17 @@ sap.ui.define([
 					operator: FilterOperator.EQ,
 					value1: sDescription
 				}));
-				
+
 			const oCombinedFilter = new Filter({
 				filters: aMaterialFilters.concat(aDescriptionFilters),
 				and: false // use "or"
 			});
-			
+
 			const oTable = this._byId("tableMain");
 			const oItemBinding = oTable.getBinding("items");
 			oItemBinding.filter([oCombinedFilter]);
 		},
-	
+
 		/**
 		 * Lifecyle method: called to produce renderable content
 		 * 
@@ -194,12 +195,12 @@ sap.ui.define([
 		 * @returns {sap.m.Table} - Main table for displaying urgent board
 		 */
 		createContent() {
-		 	if (!this._oTable) {
-		 		this._oTable = sap.ui.xmlfragment(this.getId(), "codan.zurgentboard.view.MainTable", this);
-		 	}
+			if (!this._oTable) {
+				this._oTable = sap.ui.xmlfragment(this.getId(), "codan.zurgentboard.view.MainTable", this);
+			}
 			return this._oTable;
-		 },
-		 
+		},
+
 		/**
 		 * Builds property 'search/fields' in view model based on field
 		 * metadata in property '/fields'
@@ -214,7 +215,7 @@ sap.ui.define([
 				}, oField));
 			this._oViewModel.setProperty("/search/fields", aSearchFields);
 		},
-		
+
 		/**
 		 * Builds property 'sort/fields' in view model based on field
 		 * metadata in property '/fields'
@@ -233,7 +234,7 @@ sap.ui.define([
 					path: aParts[0],
 					direction: aParts[1][0]
 				};
-			});			
+			});
 			var aSortFields = Object.entries(oFields)
 				// Filter out unsortable fields
 				.filter(([, oField]) => oField.canSort)
@@ -244,8 +245,8 @@ sap.ui.define([
 					initialPosition: oField.initialSortPosition,
 					sortAscending: false, // May be changed by user
 					sortDescending: false, // May be changed by user
-					canMoveUp: false,	// Will be set in _setSortFieldCanMove()
-					canMoveDown: false	// Will be set in _setSortFieldCanMove()
+					canMoveUp: false, // Will be set in _setSortFieldCanMove()
+					canMoveDown: false // Will be set in _setSortFieldCanMove()
 				}))
 				// Check if a default setting exists
 				.map((oField) => {
@@ -257,7 +258,7 @@ sap.ui.define([
 						oField.initialPosition = startValueIndex;
 					}
 					return oField;
-				})				
+				})
 				// Sort by initial sort position
 				.sort((oA, oB) => {
 					if (typeof oA.initialPosition === "undefined" && typeof oB.initialPosition === "undefined") {
@@ -276,7 +277,7 @@ sap.ui.define([
 			this._oViewModel.setProperty("/sort/fields", aSortFields);
 			this._updateSortActiveFieldCount(aSortFields);
 		},
-		
+
 		_setSortFieldCanMove(oField, nIndex, aFields) {
 			if (oField.sortAscending || oField.sortDescending) {
 				if (nIndex > 0) {
@@ -284,7 +285,7 @@ sap.ui.define([
 				} else {
 					oField.canMoveUp = false;
 				}
-				
+
 				const oNextField = aFields[nIndex + 1];
 				if (oNextField && (oNextField.sortAscending || oNextField.sortDescending)) {
 					oField.canMoveDown = true;
@@ -297,13 +298,13 @@ sap.ui.define([
 			}
 			return oField;
 		},
-		
+
 		onTableSelectionChange() {
 			var oTable = this._byId("tableMain");
 			var aSelectedItems = oTable.getSelectedItems();
 			this._oViewModel.setProperty("/selectedCount", aSelectedItems.length);
 		},
-		
+
 		_byId(sControlId) {
 			const sComponentId = this.getId();
 			const sFullId = `${sComponentId}--${sControlId}`;
@@ -313,7 +314,7 @@ sap.ui.define([
 			}
 			return oControl;
 		},
-		
+
 		toggleSearchSettings(oEvent) {
 			var oPopover = this._byId("searchSettingsPopover");
 			if (oPopover.isOpen()) {
@@ -322,7 +323,7 @@ sap.ui.define([
 				oPopover.openBy(oEvent.getSource());
 			}
 		},
-		
+
 		toggleSortSettings(oEvent) {
 			var oPopover = this._byId("sortSettingsPopover");
 			if (oPopover.isOpen()) {
@@ -331,32 +332,32 @@ sap.ui.define([
 				oPopover.openBy(oEvent.getSource());
 			}
 		},
-		
+
 		showCreateDialog() {
 			this._resetCreateForm();
 			var oDialog = this._byId("createItemDialog");
 			oDialog.open();
 		},
-		
+
 		sendSelectedItemsEmail() {
 			const oTable = this._byId("tableMain");
 			const oSelectedItems = oTable.getSelectedItems();
-			
+
 			// Testing reveals that large number of items selected (e.g. 10 or 51) doesn't work - no feedback or response
 			// is given from sap.m.URLHelper.triggerEmail.  So limit to 5 materials for now - finding the
 			// actual limit would require painstaking testing because it may differ on different machines and will
 			// probably turn out to be a limit on the body content size in bytes and not the number of items.
-			const nMaxItems = 5;
+			/*const nMaxItems = 5;
 			if (oSelectedItems.length > nMaxItems) {
 				MessageBox.warning("Too many items selected for sending email.  Please limit your selection to " + nMaxItems);
 				return;
-			}
-			
+			}*/
+
 			// Get item data for selected items
 			const aItemData = oSelectedItems
 				.map(oTableItem => oTableItem.getBindingContextPath())
 				.map(sPath => this._oODataModel.getProperty(sPath));
-			
+
 			// Build default recipients
 			const sRecipients = aItemData
 				.map(oItemData => oItemData.contactEmail)
@@ -367,43 +368,39 @@ sap.ui.define([
 					return aUnique;
 				}, [])
 				.join("; ");
-			
+
 			// Build email content
 			const sSubject = "Urgent Board materials";
-			const sItemSeparator = "\n***********************************************************************\n";
+			const sItemSeparator = "\r\n***********************************************************************\r\n";
 			let sBody = aItemData
 				.map(oItemData => this._getEmailBodyForItem(oItemData))
 				.join(sItemSeparator);
 			sBody = `${sItemSeparator}${sBody}${sItemSeparator}`;
-			
-			// Create email in outlook
-			sap.m.URLHelper.triggerEmail(sRecipients, sSubject, sBody);
-			MessageToast.show("New draft email opened in Outlook");
+
+			this.openSendEmailDialog(sRecipients, sSubject, sBody);
 		},
-		
+
 		sendItemEmail(oEvent) {
 			// Get item 
 			var oButton = oEvent.getSource();
 			var sItemPath = oButton.getBindingContext().sPath;
 			var oItemData = this._oODataModel.getProperty(sItemPath);
-			
+
 			// Build email content
 			let sSubject = `Urgent Board material ${oItemData.material}`;
 			if (oItemData.comments) {
 				sSubject = `${sSubject}: ${oItemData.comments}`;
 			}
 			const sBody = this._getEmailBodyForItem(oItemData);
-			
-			// Create email in outlook
-			sap.m.URLHelper.triggerEmail(oItemData.contactEmail, sSubject, sBody);
-			MessageToast.show("New draft email opened in Outlook");
+
+			this.openSendEmailDialog(oItemData.contactEmail, sSubject, sBody);
 		},
-		
+
 		clearSelections() {
 			this._byId("tableMain").removeSelections(true);
 			this.onTableSelectionChange();
 		},
-		
+
 		_getEmailBodyForItem(oItemData) {
 			// Replace undefined values in oItemData with "" into oData
 			const oData = {};
@@ -415,7 +412,7 @@ sap.ui.define([
 						oData[key] = "";
 					}
 				});
-				
+
 			var aLines = [
 				`Material:  ${oData.material} (${oData.description})`,
 				`Quantity required:  ${
@@ -434,7 +431,7 @@ sap.ui.define([
 				`Deliver to:  ${oData.deliverTo}`,
 				`Comments:  ${oData.comments}`
 			];
-			
+
 			// If we have an order, insert details below material
 			if (oData.type) {
 				var sOrderText = `${oData.typeText}:  ${oData.objectkey}`;
@@ -445,15 +442,15 @@ sap.ui.define([
 				}
 			}
 
-			return aLines.join("\n");
+			return aLines.join("\r\n");
 		},
-		
+
 		_resetCreateForm() {
 			this._resetFields();
 			this._resetCreateFormMessage();
 			this._oViewModel.refresh();
 		},
-		
+
 		_resetFields() {
 			var oFields = this._oViewModel.getProperty("/fields");
 			for (var sFieldName in oFields) {
@@ -463,7 +460,7 @@ sap.ui.define([
 				oField.valueStateText = "";
 			}
 		},
-		
+
 		_getFieldValues() {
 			var oFields = this._oViewModel.getProperty("/fields");
 			var oValues = {};
@@ -473,7 +470,7 @@ sap.ui.define([
 			}
 			return oValues;
 		},
-		
+
 		/**
 		 * Validate each field before creating the item
 		 */
@@ -482,11 +479,11 @@ sap.ui.define([
 			var bAllValid = true;
 			var oFields = this._oViewModel.getProperty("/fields");
 			var oAllItemValues = this._getFieldValues();
-			
+
 			for (var sFieldName in oFields) {
 				var oField = oFields[sFieldName];
 				var bFieldValid = true;
-				
+
 				// Determine if field is required
 				var bRequired;
 				if (typeof oField.required === "function") {
@@ -496,14 +493,14 @@ sap.ui.define([
 					// Assume boolean flag
 					bRequired = oField.required;
 				}
-				
+
 				// Validate required field	
 				if (bRequired && !oField.value) {
 					bFieldValid = false;
 					oField.valueState = ValueState.Error;
 					oField.valueStateText = "'" + oField.label + "' is required";
 				}
-				
+
 				// Handle valid / invalid
 				if (!bFieldValid) {
 					bAllValid = false;
@@ -518,27 +515,27 @@ sap.ui.define([
 			this._oViewModel.refresh();
 			return bAllValid;
 		},
-		
+
 		_setCreateFormMessage(oMessageType, sMessageText) {
 			this._oViewModel.setProperty("/create/message/type", oMessageType);
 			this._oViewModel.setProperty("/create/message/text", sMessageText);
 		},
-		
+
 		_resetCreateFormMessage() {
 			this._setCreateFormMessage(MessageType.None, "");
 		},
-		
+
 		closeCreateDialog() {
 			this._byId("createItemDialog").close();
 		},
-		
+
 		createItem() {
 			// Some front end validation for required fields that oData service doesn't give
 			// friendly messages if not provided.
 			if (!this._validateFieldsBeforeCreate()) {
 				return;
 			}
-			
+
 			// Create item
 			this._setBusy(true);
 			var oNewItemData = this._getFieldValues();
@@ -547,7 +544,7 @@ sap.ui.define([
 			this._oODataModel.create(sPath, oNewItemData, {
 				success: (oData) => {
 					this._setBusy(false);
-					this.closeCreateDialog();	
+					this.closeCreateDialog();
 					MessageToast.show("Material '" + oData.description + "' added");
 					this._resetODataModel();
 				},
@@ -559,7 +556,7 @@ sap.ui.define([
 				}
 			});
 		},
-		
+
 		toggleItemOverflowPopover(oEvent) {
 			var oButton = oEvent.getSource();
 			var oItem = utils.findControlInParents("sap.m.ColumnListItem", oButton);
@@ -571,33 +568,33 @@ sap.ui.define([
 				oPopover.openBy(oButton);
 			}
 		},
-		
+
 		closeItemOverflowPopover(oEvent) {
 			var oButton = oEvent.getSource();
-			var oPopover =  utils.findControlInParents("sap.m.ResponsivePopover", oButton);
+			var oPopover = utils.findControlInParents("sap.m.ResponsivePopover", oButton);
 			oPopover.close();
 		},
-		
+
 		cancelItemOverflowPopover(oEvent) {
 			var oButton = oEvent.getSource();
-			var oPopover =  utils.findControlInParents("sap.m.ResponsivePopover", oButton);
+			var oPopover = utils.findControlInParents("sap.m.ResponsivePopover", oButton);
 			this._resetItemOverflowPopover();
 			this._resetErrorFlagItemOverflowPopover();
 			oPopover.close();
 		},
-		
+
 		_resetItemOverflowPopover() {
 			this._resetODataModel();
 			this._resetFields();
 			this._oViewModel.setProperty("/itemPopover/hasError", false);
 			this._oViewModel.refresh();
 		},
-		
+
 		_resetODataModel() {
-			this._oODataModel.resetChanges(); 
-			this._oODataModel.setUseBatch(false); 
+			this._oODataModel.resetChanges();
+			this._oODataModel.setUseBatch(false);
 		},
-	
+
 		_getItemOverflowPopover(oItem) {
 			// Find or create popover
 			var oPopover;
@@ -608,17 +605,17 @@ sap.ui.define([
 				oItem.addDependent(oPopover);
 			} else {
 				oPopover = utils.findControlInAggregation("sap.m.ResponsivePopover", aDependents);
-			}			
+			}
 			return oPopover;
 		},
-		
+
 		_preventPopoverCloseIfError(oEvent) {
 			const bHasError = this._oViewModel.getProperty("/itemPopover/hasError");
 			if (bHasError) {
 				this._reopenPopoverPreservingState(oEvent.getSource());
 			}
 		},
-		
+
 		validateDateRange(event) {
 			if (event.getParameter("valid")) {
 				event.getSource().setValueState(sap.ui.core.ValueState.None);
@@ -629,7 +626,7 @@ sap.ui.define([
 		},
 
 		setDueInPast() {
-			this._oViewModel.setProperty("/searchDateFrom", new Date("01/01/2000"));	
+			this._oViewModel.setProperty("/searchDateFrom", new Date("01/01/2000"));
 			this._oViewModel.setProperty("/searchDateTo", new Date());
 			this.onSearch();
 		},
@@ -659,7 +656,7 @@ sap.ui.define([
 			var sSearchValue = this._oViewModel.getProperty("/search/value");
 			var dSearchDateFrom = this._oViewModel.getProperty("/searchDateFrom");
 			var dSearchDateTo = this._oViewModel.getProperty("/searchDateTo") || new Date(dSearchDateFrom);
-			
+
 			// Build filters for each active search field
 			var aAllFilters = [];
 			if (sSearchValue) {
@@ -670,12 +667,12 @@ sap.ui.define([
 						operator: FilterOperator.Contains,
 						value1: sSearchValue
 					}));
-				
+
 				// If no field filters active, advise user that nothing will be selected
 				if (!aFieldFilters.length) {
 					MessageBox.warning("Nothing will be found because no search fields have been selected");
 				}
-				
+
 				// Combine filters with OR statement not AND
 				var oCombinedFilter = new Filter({
 					filters: aFieldFilters,
@@ -694,22 +691,22 @@ sap.ui.define([
 					value1: dSearchDateFrom,
 					value2: dSearchDateTo
 				}));
-			}			
+			}
 
 			// Apply filter
 			var oTable = this._byId("tableMain");
 			var oBinding = oTable.getBinding("items");
 			oBinding.filter(aAllFilters);
 		},
-		
+
 		_setBusy(bBusy) {
 			this._oViewModel.setProperty("/state/busy", bBusy);
 		},
-		
+
 		_isBusy() {
-			return  this._oViewModel.getProperty("/state/busy");
+			return this._oViewModel.getProperty("/state/busy");
 		},
-		
+
 		onItemFieldChange(oEvent) {
 			const oEventSource = oEvent.getSource();
 			const sItemPath = oEventSource.getBindingContext().sPath;
@@ -729,12 +726,12 @@ sap.ui.define([
 				sNewValue = oEventSource.getValue();
 				sValueStateTextPath = oEventSource.getBinding("valueStateText").sPath;
 			}
-			
+
 			// Merge new value and existing record into update record
 			var oItem = this._oODataModel.getProperty(sItemPath);
 			var oUpdateRec = Object.assign({}, oItem);
 			oUpdateRec[sValuePath] = sNewValue;
-			
+
 			// Execute update
 			this._setBusy(true);
 			this._oODataModel.setUseBatch(false);
@@ -758,7 +755,7 @@ sap.ui.define([
 					}
 					this._resetErrorFlagItemOverflowPopover();
 					this._oViewModel.refresh();
-					
+
 					// If this update has been triggered by the popover closing, then
 					// reopen it preserving state so value state / message can be 
 					// reviewed by the user
@@ -769,7 +766,7 @@ sap.ui.define([
 				}
 			});
 		},
-		
+
 		_resetErrorFlagItemOverflowPopover() {
 			var oFields = this._oViewModel.getProperty("/fields");
 			var bHasError = false;
@@ -786,7 +783,7 @@ sap.ui.define([
 			var oOverflowButton = utils.findControlInAggregation("sap.m.Button", oListItem.getAggregation("cells"));
 			oPopover.openBy(oOverflowButton);
 		},
-		
+
 		confirmDeleteItem(oEvent) {
 			// Ask user to confirm
 			var oButton = oEvent.getSource();
@@ -798,7 +795,7 @@ sap.ui.define([
 				}
 			});
 		},
-		
+
 		_deleteItem(oButton) {
 			var sItemPath = oButton.getBindingContext().sPath;
 			this._setBusy(true);
@@ -814,14 +811,14 @@ sap.ui.define([
 				error: this._handleSimpleODataError.bind(this)
 			});
 		},
-		
+
 		_handleSimpleODataError(oError) {
 			this._setBusy(false);
 			this._resetODataModel();
 			var sMessage = utils.parseError(oError);
 			MessageBox.error(sMessage);
 		},
-		
+
 		confirmDeleteSelectedItems() {
 			var oTable = this._byId("tableMain");
 			var aSelectedItems = oTable.getSelectedItems();
@@ -833,7 +830,7 @@ sap.ui.define([
 				}
 			});
 		},
-		
+
 		_deleteSelectedItems(aSelectedItems) {
 			// Update oDataModel in batch
 			const sDeferredGroupId = "removeSelectedItems";
@@ -847,7 +844,7 @@ sap.ui.define([
 				.forEach(sItemPath => {
 					this._oODataModel.remove(sItemPath, oRequestParams);
 				});
-			
+
 			// Submit changes
 			this._setBusy(true);
 			this._oODataModel.submitChanges({
@@ -862,7 +859,7 @@ sap.ui.define([
 				error: this._handleSimpleODataError.bind(this)
 			});
 		},
-		
+
 		/**
 		 * Parses the oData return value from a batch submission, handling errors
 		 * and return a flag if any errors were found.
@@ -889,7 +886,7 @@ sap.ui.define([
 			} else {
 				sErrorMessage = "Unexpected problem / missing data in batch response.";
 			}
-			
+
 			// Handle error
 			if (sErrorMessage) {
 				MessageBox.error(sErrorMessage);
@@ -898,27 +895,27 @@ sap.ui.define([
 				return false;
 			}
 		},
-		
+
 		onPressSortAscending(oEvent) {
 			this._onPressSortDirection("ASC", oEvent);
 		},
-		
+
 		onPressSortDescending(oEvent) {
 			this._onPressSortDirection("DESC", oEvent);
 		},
-		
+
 		onPressSortRemove(oEvent) {
 			this._onPressSortDirection("", oEvent);
 		},
-		
+
 		onPressSortMoveDown(oEvent) {
 			this._onPressSortMovePosition(1, oEvent);
 		},
-		
+
 		onPressSortMoveUp(oEvent) {
 			this._onPressSortMovePosition(-1, oEvent);
 		},
-		
+
 		_onPressSortMovePosition(nChange, oEvent) {
 			const oButton = oEvent.getSource();
 			const sSelectedFieldPath = oButton.getBindingContext("viewModel").sPath;
@@ -929,27 +926,27 @@ sap.ui.define([
 			if (nNewIndex > -1 && nNewIndex < aSortFields.length) {
 				// Swap position of selected and target postion fields
 				this._swapArrayElements(nIndex, nNewIndex, aSortFields);
-				
+
 				// Update 'canMoveUp/Down' properties of all fields
 				aSortFields.forEach(this._setSortFieldCanMove);
-				
-				this._oViewModel.refresh();		
+
+				this._oViewModel.refresh();
 				this._updateTableSort(aSortFields);
 			}
 		},
-		
+
 		_onPressSortDirection(sDirection, oEvent) {
 			// Get sort fields and remember current state
 			const aSortFields = this._oViewModel.getProperty("/sort/fields");
 			const nIndexFirstInactive = aSortFields.findIndex(oField => !oField.sortAscending && !oField.sortDescending);
 			const nIndexLastActive = nIndexFirstInactive - 1;
-			
+
 			// Get sort field clicked on
 			const oButton = oEvent.getSource();
 			const sSelectedPath = oButton.getBindingContext("viewModel").sPath;
 			const oSelected = this._oViewModel.getProperty(sSelectedPath);
 			const nSelectedIndex = aSortFields.findIndex(oField => oField.path === oSelected.path);
-			
+
 			// Move sort field according to old and new active
 			const bOldActive = oSelected.sortAscending || oSelected.sortDescending;
 			const bNewActive = sDirection;
@@ -962,30 +959,30 @@ sap.ui.define([
 					this._swapArrayElements(x, x + 1, aSortFields);
 				}
 			}
-			
+
 			// Update sort direction
 			switch (sDirection) {
-				case "ASC":
-					oSelected.sortAscending = true;
-					oSelected.sortDescending = false;
-					break;
-				case "DESC":
-					oSelected.sortAscending = false;
-					oSelected.sortDescending = true;
-					break;
-				default:
-					oSelected.sortAscending = oSelected.sortDescending = false;
+			case "ASC":
+				oSelected.sortAscending = true;
+				oSelected.sortDescending = false;
+				break;
+			case "DESC":
+				oSelected.sortAscending = false;
+				oSelected.sortDescending = true;
+				break;
+			default:
+				oSelected.sortAscending = oSelected.sortDescending = false;
 			}
-			
+
 			// Update 'canMoveUp/Down' properties of all fields
 			aSortFields.forEach(this._setSortFieldCanMove);
-			
+
 			// Update 'sort/activeFieldCount' property
 			this._updateSortActiveFieldCount(aSortFields);
 			this._oViewModel.refresh();
 			this._updateTableSort(aSortFields);
 		},
-		
+
 		_updateSortActiveFieldCount(aSortFields) {
 			const nCount = aSortFields
 				.reduce((nRunningTotal, oField) => {
@@ -997,13 +994,13 @@ sap.ui.define([
 				}, 0);
 			this._oViewModel.setProperty("/sort/activeFieldCount", nCount);
 		},
-		
+
 		_swapArrayElements(nIndexA, nIndexB, aArray) {
 			let oTemporary = aArray[nIndexA];
 			aArray[nIndexA] = aArray[nIndexB];
 			aArray[nIndexB] = oTemporary;
 		},
-		
+
 		_updateTableSort(aSortFields) {
 			// Some properties need custom sort functions - these are defined below
 			// Date sort is required due to bug in current version of UI5 where 
@@ -1028,23 +1025,23 @@ sap.ui.define([
 
 			// Function to determine which comparator function to use
 			const getComparator = (path) => {
-				switch(path) {
-					case "dueDate":
-						return fDateSort;
-					default:
-						return null;
-				}	
+				switch (path) {
+				case "dueDate":
+					return fDateSort;
+				default:
+					return null;
+				}
 			};
-	
+
 			// Build sorters for each active sort field
 			var aSorters = aSortFields
 				.filter(oSortField => oSortField.sortAscending || oSortField.sortDescending)
 				.map(oSortField => new Sorter({
 					path: oSortField.path,
 					descending: oSortField.sortDescending,
-					comparator: getComparator(oSortField.path)					
+					comparator: getComparator(oSortField.path)
 				}));
-			
+
 			// Apply sort
 			var oTable = this._byId("tableMain");
 			var oBinding = oTable.getBinding("items");
@@ -1072,10 +1069,10 @@ sap.ui.define([
 				}
 			}).join("");
 
-			model.create("/AppParameters",{
+			model.create("/AppParameters", {
 				application: "URGENT_BOARD",
 				name: "SORT",
-				value: sSortParams			
+				value: sSortParams
 			});
 
 			model.metadataLoaded().then(() => model.submitChanges());
@@ -1084,11 +1081,11 @@ sap.ui.define([
 
 		navToGoodsReceipt(event) {
 			const oSourceObject = event.getSource().getBindingContext().getObject(),
-				  sPurchaseOrder = oSourceObject.type === "P" ? oSourceObject.objectkey : "",
-				  oNav = sap.ushell.Container.getService("CrossApplicationNavigation");
+				sPurchaseOrder = oSourceObject.type === "P" ? oSourceObject.objectkey : "",
+				oNav = sap.ushell.Container.getService("CrossApplicationNavigation");
 
 			var hash = (oNav && oNav.hrefForExternal({
-				target : {
+				target: {
 					semanticObject: "GoodsReceipt",
 					action: "create"
 				},
@@ -1115,14 +1112,14 @@ sap.ui.define([
 			aSelectedItems
 				.map((oTableItem) => oTableItem.getBindingContextPath())
 				.map((sPath) => oModel.getProperty(sPath))
-				.forEach((oItem) => { 
+				.forEach((oItem) => {
 					if (oItem.type === "P") {
 						sPurchaseOrders = sPurchaseOrders ? sPurchaseOrders + ";" + oItem.objectkey : oItem.objectkey;
 					}
 				});
 
 			var hash = (oNav && oNav.hrefForExternal({
-				target : {
+				target: {
 					semanticObject: "GoodsReceipt",
 					action: "create"
 				},
@@ -1136,6 +1133,135 @@ sap.ui.define([
 					shellHash: hash
 				}
 			});
+		},
+
+		openSendEmailDialog(sRecipients, sSubject, sBody) {
+			var initData = {
+				recipients: {
+					value: sRecipients,
+					valueState: ValueState.None,
+					valueStateText: "",
+					required: true
+				},
+				ccRecipients: {
+					value: "",
+					valueState: ValueState.None,
+					valueStateText: ""
+				},
+				bccRecipients: {
+					value: "",
+					valueState: ValueState.None,
+					valueStateText: ""
+				},
+				subject: {
+					value: sSubject,
+					valueState: ValueState.None,
+					valueStateText: ""
+				},
+				bodyText: {
+					value: sBody,
+					valueState: ValueState.None,
+					valueStateText: ""
+				}
+			};
+
+			this._oViewModel.setProperty("/sendEmailFields", initData);
+
+			if (!this._oSendEmailDialog) {
+				this._oSendEmailDialog = this._byId("sendEmailDialog");
+			}
+			this._oSendEmailDialog.open();
+
+		},
+		
+		validateSendEmail() {
+			var sendEmailFields = this._oViewModel.getProperty("/sendEmailFields"),
+				result = true;
+				
+			this.validateEmailString(sendEmailFields.recipients);
+			this.validateEmailString(sendEmailFields.ccRecipients);
+			this.validateEmailString(sendEmailFields.bccRecipients);
+			
+			for (var sField in sendEmailFields) {
+				if (sendEmailFields[sField].valueState === ValueState.Error) {
+					result = false;
+				}
+			}
+			
+			this._oViewModel.setProperty("/sendEmailFields", sendEmailFields);
+			
+			return result;
+			
+		},
+		
+		validateEmailString(oEmailField) {
+			oEmailField.valueState = ValueState.None;
+			oEmailField.valueStateText = "";
+			
+			if (!oEmailField.value) {
+				if (oEmailField.required) {
+					oEmailField.valueState = ValueState.Error;
+					oEmailField.valueStateText = "Enter at least one recipient";
+				}
+				return;
+			}
+			
+			var emails = oEmailField.value.split(";");
+			
+			emails.forEach(email => {
+				if (!/([\w+-.%]+@[\w-.]+\.[A-Za-z]{2,4}?)+/.test(email)) {
+					oEmailField.valueState = ValueState.Error;
+					oEmailField.valueStateText = "Invalid email - enter an email address or list of emails separated by semi-colon (;)";
+				}
+			});
+			
+		},
+		
+		sendEmail() {
+			
+			var that = this;
+			if (!this.validateSendEmail()) {
+				return;
+			}
+			
+			this._setBusy(true);
+			
+			var sendEmailFields = this._oViewModel.getProperty("/sendEmailFields");
+			
+			this.getModel("common").callFunction("/SendEmail", {
+				method: "POST",
+				urlParameters: {
+					Recipients: sendEmailFields.recipients.value,
+					CCRecipients: sendEmailFields.ccRecipients.value || "",
+					BCCRecipients: sendEmailFields.bccRecipients.value || "",
+					Subject: sendEmailFields.subject.value || "",
+					BodyText: sendEmailFields.bodyText.value || ""
+				},
+				success: function () {
+					that._setBusy(false);
+					
+					that._oSendEmailDialog.close();
+					
+					MessageToast.show("Email Sent Successfully", {
+						duration: 5000
+					});
+				},
+				error: function () {
+					// Gotta do something.
+					that._setBusy(false);
+					MessageBox.error("An error occurred - the email has not been sent successfully.", {
+						title: "Unexpected error during email send"
+					});
+					
+				}
+			});
+		},
+		
+
+		closeSendEmailDialog() {
+			if (this._oSendEmailDialog) {
+				this._oSendEmailDialog.close();
+			}
 		}
 	});
 });
