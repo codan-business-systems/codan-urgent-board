@@ -142,8 +142,11 @@ sap.ui.define([
 					allowCreate: true,
 					allowUpdate: true,
 					allowUserFiltering: true,
-					allowNavToGR: true
-				}
+					allowNavToGR: true,
+					showOpen: true,
+					showCompleted: false
+				},
+				completeSelectedCount: 0
 			};
 		}
 	};

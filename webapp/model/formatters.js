@@ -1,9 +1,10 @@
 sap.ui.define([], function () {
 	"use strict";
 	return {
-		navToGRButtonVisible(bItemHasError, bNavToGRAllowed) {
+		navToGRButtonVisible(bItemHasError, bNavToGRAllowed, bItemComplete) {
 			return bItemHasError === false
-				&& bNavToGRAllowed === true;
+				&& bNavToGRAllowed === true
+				&& bItemComplete !== true;
 		},
 
 		inputQuantityEnabled(bUnlimitedQuantity, bUpdateAllowed) {

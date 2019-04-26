@@ -1,0 +1,126 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	class="sapUiSizeCompact" 
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	displayBlock="true">
+	<Table
+		id="tableCompleted"
+		width="auto"
+		mode="MultiSelect"
+		selectionChange="onCompletedTableSelectionChange"
+		class="sapUiNoMargin"
+		items="{
+			path: '/Items',
+			filters: {
+				path: 'completedFlag',
+				operator: 'EQ',
+				value1: true
+			},
+			parameters: {
+				operationMode: 'Client',
+				threshold: 500
+			}
+		}">
+
+		<headerToolbar>
+			<Toolbar class="sapUiNoMargin">
+				<!--Selected items toolbar controls - visible when rows selected -->
+				<Title
+					visible="{= ${viewModel>/completeSelectedCount} === 0 }"
+					text="Completed Items"/>
+				<Title
+					visible="{= ${viewModel>/completeSelectedCount} > 0 }"
+					text="{viewModel>/completeSelectedCount} item(s) selected"/>
+				<Button
+					visible="{= ${viewModel>/completeSelectedCount} > 0 }"
+					tooltip="{i18n>clearSelection}"
+					press="clearCompleteSelections"
+					icon="sap-icon://decline"/>
+				<Button
+					visible="{= ${viewModel>/completeSelectedCount} > 0 }"
+					tooltip="{i18n>sendEmailForSelected}"
+					press="sendSelectedCompleteItemsEmail"
+					icon="sap-icon://email"/>
+				<Button
+					visible="{= ${viewModel>/completeSelectedCount} > 0 }"
+					tooltip="{i18n>deleteSelected}"
+					press="confirmDeleteSelectedCompleteItems"
+					type="Reject"
+					icon="sap-icon://delete"/>
+			</Toolbar>
+		</headerToolbar>
+
+		<columns>
+			<Column id="colCompMaterial" width="20%">
+				<Text text="Material"/>
+			</Column>
+			<Column id="colCompOrder">
+				<Text text="Order"/>
+			</Column>
+			<Column id="colCompSupplier">
+				<Text text="Supplier"/>
+			</Column>
+			<Column id="colCompQuantity" hAlign="Right">
+				<Text text="Quantity"/>
+			</Column>
+			<Column id="colCompDueDate">
+				<Text text="Due"/>
+			</Column>
+			<Column id="colCompContact">
+				<Text text="Contact"/>
+			</Column>
+			<Column id="colCompDeliverToNotes" width="15rem">
+				<Text text="Deliver to / Notes"/>
+			</Column>
+			<Column>
+			</Column>
+		</columns>
+
+		<items>
+			<ColumnListItem>
+				<cells>
+					<!--Use VBox and extra text over ObjectIdentifier text attribute as there is way-->
+					<!--too much space between title and text in the latter-->
+					<VBox>
+						<ObjectIdentifier title="{material}"/>
+						<Text text="{description}"/>
+					</VBox>
+					<HBox>
+						<core:Icon
+							visible="{= !!(${type}) }"
+							tooltip="{typeText}"
+							class="sapUiTinyMarginEnd"
+							src="{
+								path: 'type',
+								formatter: '.formatters.typeIconSrc'
+							}">
+						</core:Icon>
+						<Text text="{
+							parts: ['objectkey', 'line'],
+							formatter: '.formatters.orderText'
+						}"/>
+					</HBox>
+					<Text text="{supplierName}"/>
+					<ObjectNumber
+						number="{
+							parts: ['quantity', 'quantityIssued', 'unlimitedQuantity'],
+							formatter: '.formatters.combinedQuantityText'
+						}"
+						unit="{uom}"/>
+					<Text text="{ path: 'dueDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd/MM/yyyy' } }"/>
+					<Text text="{enteredByName}"/>
+					<Text text="{
+						parts: ['deliverTo', 'comments'],
+						formatter: '.formatters.deliverToAndNotesText'
+					}"/>
+					<Button
+						icon="sap-icon://overflow"
+						press="toggleItemOverflowPopover"
+						tooltip="Edit item details"/>
+				</cells>
+			</ColumnListItem>
+		</items>
+	</Table>
+</core:FragmentDefinition>

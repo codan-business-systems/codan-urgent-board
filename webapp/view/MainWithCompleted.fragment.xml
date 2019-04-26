@@ -1,0 +1,19 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" class="sapUiSizeCompact" xmlns:mvc="sap.ui.core.mvc"
+	xmlns:html="http://www.w3.org/1999/xhtml" xmlns:l="sap.ui.layout" displayBlock="true">
+	<l:ResponsiveSplitter height="100%" defaultPane="topPane">
+		<l:PaneContainer orientation="Vertical">
+			<l:SplitPane id="topPane">
+				<ScrollContainer height="100%" horizontal="false" vertical="true">
+					<core:Fragment fragmentName="codan.zurgentboard.view.MainTable" type="XML"/>
+          	<layoutData><l:SplitterLayoutData size="70%" /></layoutData>
+				</ScrollContainer>
+			</l:SplitPane>
+			<l:SplitPane id="bottomPane">
+				<ScrollContainer height="100%" horizontal="false" vertical="true">
+					<core:Fragment fragmentName="codan.zurgentboard.view.CompletedTable" type="XML"/>
+          <layoutData><l:SplitterLayoutData size="30%" /></layoutData>
+				</ScrollContainer>
+			</l:SplitPane>
+		</l:PaneContainer>
+	</l:ResponsiveSplitter>
+</core:FragmentDefinition>

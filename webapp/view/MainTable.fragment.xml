@@ -13,6 +13,11 @@
 		class="sapUiNoMargin"
 		items="{
 			path: '/Items',
+			filters: {
+				path: 'completedFlag',
+				operator: 'EQ',
+				value1: false
+			},
 			parameters: {
 				operationMode: 'Client',
 				threshold: 500

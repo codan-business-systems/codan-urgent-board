@@ -57,6 +57,14 @@ sap.ui.define([
 					type: "string[]",
 					group: "Misc",
 					defaultValue: []
+				},
+				showOpen: {
+					type: "string",
+					defaultValue: "true"
+				},
+				showCompleted: {
+					type: "string",
+					defaultValue: "false"
 				}
 			}
 		},
@@ -151,6 +159,20 @@ sap.ui.define([
 			this._filterTableByProps();
 		},
 
+		setShowOpen(allow) {
+			this.setProperty("showOpen", allow);
+			const bAllow = (allow === "true" || allow === true);
+			this._oViewModel.setProperty("/settings/showOpen", bAllow);
+			this._oViewModel.refresh();
+		},
+
+		setShowCompleted(allow) {
+			this.setProperty("showCompleted", allow);
+			const bAllow = (allow === "true" || allow === true);
+			this._oViewModel.setProperty("/settings/showCompleted", bAllow);
+			this._oViewModel.refresh();
+		},
+
 		_filterTableByProps() {
 			this.clearSelections();
 
@@ -192,13 +214,21 @@ sap.ui.define([
 		 * 
 		 * Akin to the renderer of a custom control
 		 *
-		 * @returns {sap.m.Table} - Main table for displaying urgent board
+		 * @returns {sap.m.VBox or sap.m.Table} - Container for Main table for displaying urgent board and Completed Table
 		 */
 		createContent() {
-			if (!this._oTable) {
-				this._oTable = sap.ui.xmlfragment(this.getId(), "codan.zurgentboard.view.MainTable", this);
+
+			if (this.getComponentData() && this.getComponentData().showCompleted) {
+				if (!this._oView) {
+					this._oView = sap.ui.xmlfragment(this.getId(), "codan.zurgentboard.view.MainWithCompleted", this);
+				}
+				return this._oView;
+			} else {
+				if (!this._oTable) {
+					this._oTable = sap.ui.xmlfragment(this.getId(), "codan.zurgentboard.view.MainTable", this);
+				}
+				return this._oTable;
 			}
-			return this._oTable;
 		},
 
 		/**
@@ -339,9 +369,9 @@ sap.ui.define([
 			oDialog.open();
 		},
 
-		sendSelectedItemsEmail() {
+		sendSelectedItemsEmail(aSelectedItems) {
 			const oTable = this._byId("tableMain");
-			const oSelectedItems = oTable.getSelectedItems();
+			const oSelectedItems = aSelectedItems || oTable.getSelectedItems();
 
 			// Testing reveals that large number of items selected (e.g. 10 or 51) doesn't work - no feedback or response
 			// is given from sap.m.URLHelper.triggerEmail.  So limit to 5 materials for now - finding the
@@ -819,9 +849,9 @@ sap.ui.define([
 			MessageBox.error(sMessage);
 		},
 
-		confirmDeleteSelectedItems() {
+		confirmDeleteSelectedItems(aSelected) {
 			var oTable = this._byId("tableMain");
-			var aSelectedItems = oTable.getSelectedItems();
+			var aSelectedItems = aSelected || oTable.getSelectedItems();
 			MessageBox.confirm(`Are you sure you want to delete ${aSelectedItems.length} item(s)?`, {
 				onClose: (oAction) => {
 					if (oAction === MessageBox.Action.OK) {
@@ -1173,31 +1203,31 @@ sap.ui.define([
 			this._oSendEmailDialog.open();
 
 		},
-		
+
 		validateSendEmail() {
 			var sendEmailFields = this._oViewModel.getProperty("/sendEmailFields"),
 				result = true;
-				
+
 			this.validateEmailString(sendEmailFields.recipients);
 			this.validateEmailString(sendEmailFields.ccRecipients);
 			this.validateEmailString(sendEmailFields.bccRecipients);
-			
+
 			for (var sField in sendEmailFields) {
 				if (sendEmailFields[sField].valueState === ValueState.Error) {
 					result = false;
 				}
 			}
-			
+
 			this._oViewModel.setProperty("/sendEmailFields", sendEmailFields);
-			
+
 			return result;
-			
+
 		},
-		
+
 		validateEmailString(oEmailField) {
 			oEmailField.valueState = ValueState.None;
 			oEmailField.valueStateText = "";
-			
+
 			if (!oEmailField.value) {
 				if (oEmailField.required) {
 					oEmailField.valueState = ValueState.Error;
@@ -1205,29 +1235,29 @@ sap.ui.define([
 				}
 				return;
 			}
-			
+
 			var emails = oEmailField.value.split(";");
-			
+
 			emails.forEach(email => {
 				if (!/([\w+-.%]+@[\w-.]+\.[A-Za-z]{2,4}?)+/.test(email)) {
 					oEmailField.valueState = ValueState.Error;
 					oEmailField.valueStateText = "Invalid email - enter an email address or list of emails separated by semi-colon (;)";
 				}
 			});
-			
+
 		},
-		
+
 		sendEmail() {
-			
+
 			var that = this;
 			if (!this.validateSendEmail()) {
 				return;
 			}
-			
+
 			this._setBusy(true);
-			
+
 			var sendEmailFields = this._oViewModel.getProperty("/sendEmailFields");
-			
+
 			this.getModel("common").callFunction("/SendEmail", {
 				method: "POST",
 				urlParameters: {
@@ -1239,9 +1269,9 @@ sap.ui.define([
 				},
 				success: function () {
 					that._setBusy(false);
-					
+
 					that._oSendEmailDialog.close();
-					
+
 					MessageToast.show("Email Sent Successfully", {
 						duration: 5000
 					});
@@ -1252,16 +1282,35 @@ sap.ui.define([
 					MessageBox.error("An error occurred - the email has not been sent successfully.", {
 						title: "Unexpected error during email send"
 					});
-					
+
 				}
 			});
 		},
-		
 
 		closeSendEmailDialog() {
 			if (this._oSendEmailDialog) {
 				this._oSendEmailDialog.close();
 			}
+		},
+		
+		onCompletedTableSelectionChange() {
+			var oTable = this._byId("tableCompleted");
+			var aSelectedItems = oTable.getSelectedItems();
+			this._oViewModel.setProperty("/completeSelectedCount", aSelectedItems.length);
+		},
+		
+		
+		clearCompleteSelections() {
+			this._byId("tableCompleted").removeSelections(true);
+			this.onCompletedTableSelectionChange();
+		},
+		
+		sendSelectedCompleteItemsEmail() {
+			this.sendSelectedItemsEmail(this._byId("tableCompleted").getSelectedItems());
+		},
+		
+		confirmDeleteSelectedCompleteItems() {
+			this.confirmDeleteSelectedItems(this._byId("tableCompleted").getSelectedItems()); 
 		}
 	});
 });

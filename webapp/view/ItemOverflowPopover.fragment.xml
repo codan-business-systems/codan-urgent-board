@@ -139,7 +139,7 @@
 					tooltip="Delete item"/>
 				<Button
 					visible="{
-						parts: ['viewModel>/itemPopover/hasError', 'viewModel>/settings/allowNavToGR'],
+						parts: ['viewModel>/itemPopover/hasError', 'viewModel>/settings/allowNavToGR', 'completedFlag'],
 						formatter: '.formatters.navToGRButtonVisible'
 					}"
 					press="navToGoodsReceipt"
