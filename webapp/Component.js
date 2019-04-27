@@ -65,6 +65,10 @@ sap.ui.define([
 				showCompleted: {
 					type: "string",
 					defaultValue: "false"
+				},
+				inlineQty: {
+					type: "string",
+					defaultValue: "false"
 				}
 			}
 		},
@@ -170,6 +174,13 @@ sap.ui.define([
 			this.setProperty("showCompleted", allow);
 			const bAllow = (allow === "true" || allow === true);
 			this._oViewModel.setProperty("/settings/showCompleted", bAllow);
+			this._oViewModel.refresh();
+		},
+		
+		setInlineQtyd(allow) {
+			this.setProperty("setInlineQty", allow);
+			const bAllow = (allow === "true" || allow === true);
+			this._oViewModel.setProperty("/settings/setInlineQty", bAllow);
 			this._oViewModel.refresh();
 		},
 

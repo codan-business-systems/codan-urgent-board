@@ -144,7 +144,8 @@ sap.ui.define([
 					allowUserFiltering: true,
 					allowNavToGR: true,
 					showOpen: true,
-					showCompleted: false
+					showCompleted: false,
+					inlineQty: false
 				},
 				completeSelectedCount: 0
 			};
