@@ -772,6 +772,10 @@ sap.ui.define([
 			var oItem = this._oODataModel.getProperty(sItemPath);
 			var oUpdateRec = Object.assign({}, oItem);
 			oUpdateRec[sValuePath] = sNewValue;
+			
+			// Check for a follow up action (if a button was pressed)
+			var activeElement = sap.ui.getCore().byId(document.activeElement.id);
+			
 
 			// Execute update
 			this._setBusy(true);
@@ -786,6 +790,10 @@ sap.ui.define([
 					this._resetErrorFlagItemOverflowPopover();
 					MessageToast.show("Item updated.");
 					this._resetODataModel();
+					
+					if (activeElement && activeElement.getMetadata()._sClassName === "sap.m.Button") {
+						activeElement.firePress();
+					}
 				},
 				error: (oError) => {
 					this._setBusy(false);
