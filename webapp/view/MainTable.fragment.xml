@@ -1,146 +1,49 @@
-<core:FragmentDefinition
-	xmlns="sap.m"
-	xmlns:core="sap.ui.core"
-	class="sapUiSizeCompact" 
-	xmlns:mvc="sap.ui.core.mvc"
-	xmlns:html="http://www.w3.org/1999/xhtml"
-	displayBlock="true">
-	<Table
-		id="tableMain"
-		width="auto"
-		mode="MultiSelect"
-		selectionChange="onTableSelectionChange"
-		class="sapUiNoMargin"
-		items="{
-			path: '/Items',
-			filters: {
-				path: 'completedFlag',
-				operator: 'EQ',
-				value1: false
-			},
-			parameters: {
-				operationMode: 'Client',
-				threshold: 500
-			}
-		}">
-
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" class="sapUiSizeCompact" xmlns:mvc="sap.ui.core.mvc"
+	xmlns:html="http://www.w3.org/1999/xhtml" displayBlock="true">
+	<Table id="tableMain" width="auto" mode="MultiSelect" selectionChange="onTableSelectionChange" class="sapUiNoMargin"
+		items="{ path: '/Items', filters: { path: 'completedFlag', operator: 'EQ', value1: false }, parameters: { operationMode: 'Client', threshold: 500 } }">
 		<headerToolbar>
 			<Toolbar class="sapUiNoMargin">
 				<!--Selected items toolbar controls - visible when rows selected -->
-				<Title
-					visible="{= ${viewModel>/selectedCount} > 0 }"
-					text="{viewModel>/selectedCount} item(s) selected"/>
-				<Button
-					visible="{= ${viewModel>/selectedCount} > 0 }"
-					tooltip="{i18n>clearSelection}"
-					press="clearSelections"
-					icon="sap-icon://decline"/>
-				<Button
-					visible="{= ${viewModel>/selectedCount} > 0 }"
-					tooltip="{i18n>sendEmailForSelected}"
-					press="sendSelectedItemsEmail"
+				<Title visible="{= ${viewModel>/selectedCount} > 0 }" text="{viewModel>/selectedCount} item(s) selected"/>
+				<Button visible="{= ${viewModel>/selectedCount} > 0 }" tooltip="{i18n>clearSelection}" press="clearSelections" icon="sap-icon://decline"/>
+				<Button visible="{= ${viewModel>/selectedCount} > 0 }" tooltip="{i18n>sendEmailForSelected}" press="sendSelectedItemsEmail"
 					icon="sap-icon://email"/>
-				<Button
-					visible="{= ${viewModel>/selectedCount} > 0 }"
-					tooltip="{i18n>deleteSelected}"
-					press="confirmDeleteSelectedItems"
-					type="Reject"
+				<Button visible="{= ${viewModel>/selectedCount} > 0 }" tooltip="{i18n>deleteSelected}" press="confirmDeleteSelectedItems" type="Reject"
 					icon="sap-icon://delete"/>
-				<Button
-					tooltip="{i18n>createNew}"
-					press="showCreateDialog"
-					visible="{
-						parts: ['viewModel>/settings/allowCreate', 'viewModel>/selectedCount'],
-						formatter: '.formatters.createButtonVisible'
-					}"
-					type="Emphasized"
-					icon="sap-icon://create-form"/>
-
-				<ToolbarSpacer />
-				
+				<Button tooltip="{i18n>createNew}" press="showCreateDialog"
+					visible="{ parts: ['viewModel>/settings/allowCreate', 'viewModel>/selectedCount'], formatter: '.formatters.createButtonVisible' }"
+					type="Emphasized" icon="sap-icon://create-form"/>
+				<ToolbarSpacer/>
 				<!--User sorting/filtering options - visible when nothing selected
 				    and user filtering/sorting is allowed -->
-				<Button
-					icon="sap-icon://sort"
-					visible="{
-						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
-						formatter: '.formatters.userFilterOrSortOptionVisible'
-					}"
-					tooltip="Sort columns"
-					press="toggleSortSettings"
-					type="Emphasized"/>
-				<DateRangeSelection 
-					dateValue="{viewModel>/searchDateFrom}"
-					visible="{
-						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
-						formatter: '.formatters.userFilterOrSortOptionVisible'
-					}"
-					secondDateValue="{viewModel>/searchDateTo}"
-					change="validateDateRange"
-					valueStateText="Enter in the format dd/MM/yyyy - dd/MM/yyyy"
-					width="auto"
-					placeholder="dd/MM/yyyy - dd/MM/yyyy"
-					displayFormat="dd/MM/yyyy"/>
-				<Button
-					tooltip="Due In Past"
-					visible="{
-						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
-						formatter: '.formatters.userFilterOrSortOptionVisible'
-					}"
-					icon="sap-icon://past"
-					press="setDueInPast"
-					type="Emphasized"/>
-				<Button
-					tooltip="Due Today"
-					visible="{
-						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
-						formatter: '.formatters.userFilterOrSortOptionVisible'
-					}"
-					icon="sap-icon://present"
-					press="setDueToday"
-					type="Emphasized"/>
-				<Button
-					tooltip="Due In Future"
-					visible="{
-						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
-						formatter: '.formatters.userFilterOrSortOptionVisible'
-					}"
-					icon="sap-icon://future"
-					press="setDueInFuture"
-					type="Emphasized"/>	
-				<Button
-					tooltip="All Dates"
-					visible="{
-						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
-						formatter: '.formatters.userFilterOrSortOptionVisible'
-					}"
-					icon="sap-icon://history"
-					press="clearDateSelection"
-					type="Emphasized"/>
-				<SearchField
-					id="searchField"
-					visible="{
-						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
-						formatter: '.formatters.userFilterOrSortOptionVisible'
-					}"
-					class="sapUiNoMarginEnd"
-					value="{viewModel>/search/value}"
-					search="onSearch"
-					width="auto">
-				</SearchField>
-				<Button
-					class="sapUiNoMarginBegin"
-					visible="{
-						parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'],
-						formatter: '.formatters.userFilterOrSortOptionVisible'
-					}"
-					type="Emphasized"
-					icon="sap-icon://drop-down-list"
-					tooltip="Search Settings"
-					press="toggleSearchSettings"/>
+				<Button icon="sap-icon://sort"
+					visible="{ parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'], formatter: '.formatters.userFilterOrSortOptionVisible' }"
+					tooltip="Sort columns" press="toggleSortSettings" type="Emphasized"/>
+				<DateRangeSelection dateValue="{viewModel>/searchDateFrom}"
+					visible="{ parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'], formatter: '.formatters.userFilterOrSortOptionVisible' }"
+					secondDateValue="{viewModel>/searchDateTo}" change="validateDateRange" valueStateText="Enter in the format dd/MM/yyyy - dd/MM/yyyy"
+					width="auto" placeholder="dd/MM/yyyy - dd/MM/yyyy" displayFormat="dd/MM/yyyy"/>
+				<Button tooltip="Due In Past"
+					visible="{ parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'], formatter: '.formatters.userFilterOrSortOptionVisible' }"
+					icon="sap-icon://past" press="setDueInPast" type="Emphasized"/>
+				<Button tooltip="Due Today"
+					visible="{ parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'], formatter: '.formatters.userFilterOrSortOptionVisible' }"
+					icon="sap-icon://present" press="setDueToday" type="Emphasized"/>
+				<Button tooltip="Due In Future"
+					visible="{ parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'], formatter: '.formatters.userFilterOrSortOptionVisible' }"
+					icon="sap-icon://future" press="setDueInFuture" type="Emphasized"/>
+				<Button tooltip="All Dates"
+					visible="{ parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'], formatter: '.formatters.userFilterOrSortOptionVisible' }"
+					icon="sap-icon://history" press="clearDateSelection" type="Emphasized"/>
+				<SearchField id="searchField"
+					visible="{ parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'], formatter: '.formatters.userFilterOrSortOptionVisible' }"
+					class="sapUiNoMarginEnd" value="{viewModel>/search/value}" search="onSearch" width="auto"></SearchField>
+				<Button class="sapUiNoMarginBegin"
+					visible="{ parts: ['viewModel>/settings/allowUserFiltering', 'viewModel>/selectedCount'], formatter: '.formatters.userFilterOrSortOptionVisible' }"
+					type="Emphasized" icon="sap-icon://drop-down-list" tooltip="Search Settings" press="toggleSearchSettings"/>
 			</Toolbar>
 		</headerToolbar>
-
 		<columns>
 			<Column id="colMaterial" width="20%">
 				<Text text="Material"/>
@@ -166,10 +69,8 @@
 			<Column id="colDeliverToNotes" width="15rem">
 				<Text text="Deliver to / Notes"/>
 			</Column>
-			<Column>
-			</Column>
+			<Column></Column>
 		</columns>
-
 		<items>
 			<ColumnListItem>
 				<cells>
@@ -180,54 +81,40 @@
 						<Text text="{description}"/>
 					</VBox>
 					<HBox>
-						<core:Icon
-							visible="{= !!(${type}) }"
-							tooltip="{typeText}"
-							class="sapUiTinyMarginEnd"
-							src="{
-								path: 'type',
-								formatter: '.formatters.typeIconSrc'
-							}">
-						</core:Icon>
-						<Text text="{
-							parts: ['objectkey', 'line'],
-							formatter: '.formatters.orderText'
-						}"/>
+						<core:Icon visible="{= !!(${type}) }" tooltip="{typeText}" class="sapUiTinyMarginEnd"
+							src="{ path: 'type', formatter: '.formatters.typeIconSrc' }"></core:Icon>
+						<Text text="{ parts: ['objectkey', 'line'], formatter: '.formatters.orderText' }"/>
 					</HBox>
 					<Text text="{supplierName}"/>
-					<ObjectNumber
-						number="{
-							parts: ['quantity', 'quantityIssued', 'unlimitedQuantity'],
-							formatter: '.formatters.combinedQuantityText'
-						}"
+					<ObjectNumber number="{ parts: ['quantity', 'quantityIssued', 'unlimitedQuantity'], formatter: '.formatters.combinedQuantityText' }"
 						unit="{uom}"/>
 					<HBox>
-						<Input
-							type="Number"
-							value="{updateQuantity}"
-							change="onItemFieldChange"
-							valueState="{viewModel>/fields/quantityIssued/valueState}"
-							valueStateText="{viewModel>/fields/quantityIssued/valueStateText}">
-						</Input>
+						<Button text="-" enabled="{= ${updateQuantity} > 0}" press="onPressDecreaseQuantity"/>
+						<Input 
+							type="Number" 
+							value="{updateQuantity}" 
+							liveChange="updateInlineQty"
+							valueLiveUpdate="true"
+							valueState="{ parts: ['quantity', 'quantityIssued', 'unlimitedQuantity', 'updateQuantity'], 
+										  formatter: '.formatters.validateUpdateQuantity' 
+										}"
+							valueStateText="Total quantity exceeds quantity requested"
+						/>
+						<Button text="+" press="onPressIncreaseQuantity"/>
 					</HBox>
 					<Text text="{ path: 'dueDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd/MM/yyyy' } }"/>
 					<Text text="{enteredByName}"/>
-					<Text text="{
-						parts: ['deliverTo', 'comments'],
-						formatter: '.formatters.deliverToAndNotesText'
-					}"/>
-					<Button
-						icon="sap-icon://overflow"
-						press="toggleItemOverflowPopover"
-						tooltip="Edit item details"/>
+					<Text text="{ parts: ['deliverTo', 'comments'], formatter: '.formatters.deliverToAndNotesText' }"/>
+					<Button icon="sap-icon://overflow" press="toggleItemOverflowPopover" tooltip="Edit item details"
+						type="{= !!${comments} ? 'Emphasized' : 'Default' }"/>
 				</cells>
 			</ColumnListItem>
 		</items>
 		<dependents>
-			 <core:Fragment fragmentName="codan.zurgentboard.view.SortSettings" type="XML" />
-			 <core:Fragment fragmentName="codan.zurgentboard.view.SearchSettings" type="XML" />
-			 <core:Fragment fragmentName="codan.zurgentboard.view.CreateItemDialog" type="XML" />
-			 <core:Fragment fragmentName="codan.zurgentboard.view.SendEmailDialog" type="XML"/>
+			<core:Fragment fragmentName="codan.zurgentboard.view.SortSettings" type="XML"/>
+			<core:Fragment fragmentName="codan.zurgentboard.view.SearchSettings" type="XML"/>
+			<core:Fragment fragmentName="codan.zurgentboard.view.CreateItemDialog" type="XML"/>
+			<core:Fragment fragmentName="codan.zurgentboard.view.SendEmailDialog" type="XML"/>
 		</dependents>
 	</Table>
 </core:FragmentDefinition>

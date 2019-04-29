@@ -1,4 +1,6 @@
-sap.ui.define([], function () {
+sap.ui.define([
+	"sap/ui/core/ValueState"
+	], function (ValueState) {
 	"use strict";
 	return {
 		navToGRButtonVisible(bItemHasError, bNavToGRAllowed, bItemComplete) {
@@ -97,6 +99,21 @@ sap.ui.define([], function () {
 			} else {
 				return false;
 			}
+		},
+		//'quantity', 'quantityIssued', 'unlimitedQuantity', 'updateQuantity'
+		validateUpdateQuantity(orderQuantity, quantityIssued, unlimitedQuantity, updateQuantity) {
+			var result = ValueState.None;
+			
+			if (unlimitedQuantity) {
+				return result;
+			}
+			
+			var total = Number(quantityIssued) + Number(updateQuantity);
+			if (Number(total) > Number(orderQuantity)) {
+				result = ValueState.Error;
+			}
+			
+			return result;
 		}
 	};
 });

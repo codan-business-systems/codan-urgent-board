@@ -102,6 +102,10 @@ sap.ui.define([
 
 			// Check if we have default sort values stored in the backend
 			this._applyDefaultSortValues();
+			
+			// Subscribe to urgent board events from consumer applications of this component
+			sap.ui.getCore().getEventBus().subscribe("codan.zUrgentBoard", "saveUpdates", this.onSaveUpdates, this);
+			sap.ui.getCore().getEventBus().subscribe("codan.zUrgentBoard", "validate", this.onValidationRequest, this);
 		},
 
 		_applyDefaultSortValues() {
@@ -177,10 +181,10 @@ sap.ui.define([
 			this._oViewModel.refresh();
 		},
 		
-		setInlineQtyd(allow) {
-			this.setProperty("setInlineQty", allow);
+		setInlineQty(allow) {
+			this.setProperty("inlineQty", allow);
 			const bAllow = (allow === "true" || allow === true);
-			this._oViewModel.setProperty("/settings/setInlineQty", bAllow);
+			this._oViewModel.setProperty("/settings/inlineQty", bAllow);
 			this._oViewModel.refresh();
 		},
 
@@ -1330,6 +1334,65 @@ sap.ui.define([
 		
 		confirmDeleteSelectedCompleteItems() {
 			this.confirmDeleteSelectedItems(this._byId("tableCompleted").getSelectedItems()); 
+		},
+		
+		onPressDecreaseQuantity(oEvent) {
+			this._stepItemQuantity(oEvent, -1);
+		},
+		
+		onPressIncreaseQuantity(oEvent) {
+			this._stepItemQuantity(oEvent, 1);
+		},
+		
+		_stepItemQuantity(oEvent, nStep) {
+			const oButton = oEvent.getSource();
+			const sItemPath = oButton.getBindingContext().sPath;
+			const oItem = this.getModel().getProperty(sItemPath);
+			var updateQuantity = oItem.updateQuantity
+				? Number(oItem.updateQuantity) + nStep
+				: nStep;
+			
+			// Urgent board currently uses one way data binding
+			this.getModel().setProperty(sItemPath + "/updateQuantity", updateQuantity.toString());
+			
+		},
+		
+		// Event handler for on save updates event
+		// Used for when inline quantities have been updated
+		// In this case, just trigger a submit changes (silently)
+		onSaveUpdates() {
+
+			this._setBusy(true);
+
+			// Submit changes*/
+			this._oODataModel.submitChanges({
+				success: (oData) => {
+					this._setBusy(false);
+					this._handleBatchResponseAndReturnErrorFlag(oData);
+					this._resetODataModel();
+				},
+				error: this._handleSimpleODataError.bind(this)
+			});
+			
+		},
+		
+		// Check there are no errors (only relevant if there are inline quantities to be changed)
+		onValidationRequest() {
+			
+			// Simple validation - check if there are any inputs with errors
+			var errors = $(".sapMInputBaseContentWrapperError").length,
+				result = errors === 0;
+			
+			// Raise the response event back to the consumer
+			sap.ui.getCore().getEventBus().publish("codan.zUrgentBoard", "validationResult", {
+				result: result
+			});
+		},
+		
+		updateInlineQty(event) {
+			var path = event.getSource().getBindingContext().getPath();
+			
+			this.getModel().setProperty(path + "/updateQuantity", event.getParameter("newValue")); 
 		}
 	});
 });
