@@ -795,6 +795,12 @@ sap.ui.define([
 					MessageToast.show("Item updated.");
 					this._resetODataModel();
 					
+					var completedTable = this._byId("tableCompleted") ;
+					
+					if (completedTable) {
+						completedTable.getBinding("items").refresh(true);
+					}
+					
 					if (activeElement && activeElement.getMetadata()._sClassName === "sap.m.Button") {
 						activeElement.firePress();
 					}
