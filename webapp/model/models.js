@@ -148,7 +148,9 @@ sap.ui.define([
 					inlineQty: false
 				},
 				completeSelectedCount: 0,
-				changes:{}
+				changes:{},
+				openItemCount: 0,
+				completeItemCount: 0
 			};
 		}
 	};

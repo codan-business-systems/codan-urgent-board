@@ -1423,6 +1423,15 @@ sap.ui.define([
 			if (completed) {
 				completed.getBinding("items").refresh(true);
 			}
+		},
+		
+		mainTableUpdateFinished(event) {
+			this._oViewModel.setProperty("/openItemCount", event.getParameter("total"));
+		},
+		
+		completeTableUpdateFinished(event) {
+			this._oViewModel.setProperty("/completeItemCount", event.getParameter("total"));
 		}
+	
 	});
 });

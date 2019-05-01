@@ -1,19 +1,19 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" class="sapUiSizeCompact" xmlns:mvc="sap.ui.core.mvc"
 	xmlns:html="http://www.w3.org/1999/xhtml" xmlns:l="sap.ui.layout" displayBlock="true">
-	<l:ResponsiveSplitter height="100%" defaultPane="topPane">
-		<l:PaneContainer orientation="Vertical">
-			<l:SplitPane id="topPane">
-				<ScrollContainer height="100%" horizontal="false" vertical="true">
+	<IconTabBar id="iconTabBar" class="sapUiResponsiveContentPadding" expandable="false"
+				backgroundDesign="Transparent" >
+		<items>
+			<IconTabFilter id="iconTabOpenItems" icon="sap-icon://sys-help" text="Open" design="Vertical" count="{viewModel>/openItemCount}">
+				<content>
 					<core:Fragment fragmentName="codan.zurgentboard.view.MainTable" type="XML"/>
-          	<layoutData><l:SplitterLayoutData size="70%" /></layoutData>
-				</ScrollContainer>
-			</l:SplitPane>
-			<l:SplitPane id="bottomPane">
-				<ScrollContainer height="100%" horizontal="false" vertical="true">
+				</content>
+			</IconTabFilter>
+			<IconTabFilter id="iconTabCompleted" icon="sap-icon://accept" text="Completed" design="Vertical" count="{viewModel>/completeItemCount}">
+				<content>
 					<core:Fragment fragmentName="codan.zurgentboard.view.CompletedTable" type="XML"/>
-          <layoutData><l:SplitterLayoutData size="30%" /></layoutData>
-				</ScrollContainer>
-			</l:SplitPane>
-		</l:PaneContainer>
-	</l:ResponsiveSplitter>
+				</content>
+			</IconTabFilter>
+		</items>
+	</IconTabBar>
+
 </core:FragmentDefinition>

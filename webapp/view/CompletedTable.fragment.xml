@@ -11,6 +11,7 @@
 		mode="MultiSelect"
 		selectionChange="onCompletedTableSelectionChange"
 		class="sapUiNoMargin"
+		updateFinished="completeTableUpdateFinished"
 		items="{
 			path: '/Items',
 			filters: {
@@ -27,9 +28,6 @@
 		<headerToolbar>
 			<Toolbar class="sapUiNoMargin">
 				<!--Selected items toolbar controls - visible when rows selected -->
-				<Title
-					visible="{= ${viewModel>/completeSelectedCount} === 0 }"
-					text="Completed Items"/>
 				<Title
 					visible="{= ${viewModel>/completeSelectedCount} > 0 }"
 					text="{viewModel>/completeSelectedCount} item(s) selected"/>
