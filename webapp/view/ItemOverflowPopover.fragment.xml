@@ -7,7 +7,8 @@
 		busy="{viewModel>/state/busy}"
 		busyIndicatorDelay="0"
 		placement="Left"
-		title="Item details">
+		title="Item details"
+		afterClose="resetTableBindings">
 		<content>
 			<form:Form
 				editable="true"

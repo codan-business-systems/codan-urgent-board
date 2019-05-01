@@ -102,7 +102,7 @@ sap.ui.define([
 
 			// Check if we have default sort values stored in the backend
 			this._applyDefaultSortValues();
-			
+
 			// Subscribe to urgent board events from consumer applications of this component
 			sap.ui.getCore().getEventBus().subscribe("codan.zUrgentBoard", "saveUpdates", this.onSaveUpdates, this);
 			sap.ui.getCore().getEventBus().subscribe("codan.zUrgentBoard", "validate", this.onValidationRequest, this);
@@ -180,7 +180,7 @@ sap.ui.define([
 			this._oViewModel.setProperty("/settings/showCompleted", bAllow);
 			this._oViewModel.refresh();
 		},
-		
+
 		setInlineQty(allow) {
 			this.setProperty("inlineQty", allow);
 			const bAllow = (allow === "true" || allow === true);
@@ -426,19 +426,27 @@ sap.ui.define([
 		},
 
 		sendItemEmail(oEvent) {
+
 			// Get item 
 			var oButton = oEvent.getSource();
 			var sItemPath = oButton.getBindingContext().sPath;
-			var oItemData = this._oODataModel.getProperty(sItemPath);
 
-			// Build email content
-			let sSubject = `Urgent Board material ${oItemData.material}`;
-			if (oItemData.comments) {
-				sSubject = `${sSubject}: ${oItemData.comments}`;
-			}
-			const sBody = this._getEmailBodyForItem(oItemData);
+			// Ensure we have the latest up to date data
+			this._oODataModel.read(sItemPath, {
+				success: (data) => {
+					var oItemData = data;
 
-			this.openSendEmailDialog(oItemData.contactEmail, sSubject, sBody);
+					// Build email content
+					let sSubject = `Urgent Board material ${oItemData.material}`;
+					if (oItemData.comments) {
+						sSubject = `${sSubject}: ${oItemData.comments}`;
+					}
+					const sBody = this._getEmailBodyForItem(oItemData);
+
+					this.openSendEmailDialog(oItemData.contactEmail, sSubject, sBody);
+				}
+			});
+
 		},
 
 		clearSelections() {
@@ -618,6 +626,7 @@ sap.ui.define([
 			var oButton = oEvent.getSource();
 			var oPopover = utils.findControlInParents("sap.m.ResponsivePopover", oButton);
 			oPopover.close();
+			this._resetODataModel();
 		},
 
 		cancelItemOverflowPopover(oEvent) {
@@ -776,14 +785,18 @@ sap.ui.define([
 			var oItem = this._oODataModel.getProperty(sItemPath);
 			var oUpdateRec = Object.assign({}, oItem);
 			oUpdateRec[sValuePath] = sNewValue;
-			
+
 			// Check for a follow up action (if a button was pressed)
 			var activeElement = sap.ui.getCore().byId(document.activeElement.id);
-			
+
+			// Call the set property so the data is available on the model, even though we are one way binding
+			// and performing an update below
+			this._oODataModel.setProperty(sValuePath, sNewValue);
 
 			// Execute update
 			this._setBusy(true);
 			this._oODataModel.setUseBatch(false);
+			this._oODataModel.setRefreshAfterChange(false);
 			this._oODataModel.update(sItemPath, oUpdateRec, {
 				success: () => {
 					this._setBusy(false);
@@ -793,17 +806,18 @@ sap.ui.define([
 					}
 					this._resetErrorFlagItemOverflowPopover();
 					MessageToast.show("Item updated.");
-					this._resetODataModel();
-					
-					var completedTable = this._byId("tableCompleted") ;
-					
-					if (completedTable) {
-						completedTable.getBinding("items").refresh(true);
-					}
-					
+					//this._resetODataModel();
+
+					//var completedTable = this._byId("tableCompleted") ;
+
+					//if (completedTable) {
+					//	completedTable.getBinding("items").refresh(true);
+					//}
+
 					if (activeElement && activeElement.getMetadata()._sClassName === "sap.m.Button") {
 						activeElement.firePress();
 					}
+					//this._oODataModel.setRefreshAfterChange(true);
 				},
 				error: (oError) => {
 					this._setBusy(false);
@@ -1296,7 +1310,7 @@ sap.ui.define([
 					Subject: sendEmailFields.subject.value || "",
 					BodyText: sendEmailFields.bodyText.value || ""
 				},
-				success: function () {
+				success: () => {
 					that._setBusy(false);
 
 					that._oSendEmailDialog.close();
@@ -1305,7 +1319,7 @@ sap.ui.define([
 						duration: 5000
 					});
 				},
-				error: function () {
+				error: () => {
 					// Gotta do something.
 					that._setBusy(false);
 					MessageBox.error("An error occurred - the email has not been sent successfully.", {
@@ -1321,48 +1335,45 @@ sap.ui.define([
 				this._oSendEmailDialog.close();
 			}
 		},
-		
+
 		onCompletedTableSelectionChange() {
 			var oTable = this._byId("tableCompleted");
 			var aSelectedItems = oTable.getSelectedItems();
 			this._oViewModel.setProperty("/completeSelectedCount", aSelectedItems.length);
 		},
-		
-		
+
 		clearCompleteSelections() {
 			this._byId("tableCompleted").removeSelections(true);
 			this.onCompletedTableSelectionChange();
 		},
-		
+
 		sendSelectedCompleteItemsEmail() {
 			this.sendSelectedItemsEmail(this._byId("tableCompleted").getSelectedItems());
 		},
-		
+
 		confirmDeleteSelectedCompleteItems() {
-			this.confirmDeleteSelectedItems(this._byId("tableCompleted").getSelectedItems()); 
+			this.confirmDeleteSelectedItems(this._byId("tableCompleted").getSelectedItems());
 		},
-		
+
 		onPressDecreaseQuantity(oEvent) {
 			this._stepItemQuantity(oEvent, -1);
 		},
-		
+
 		onPressIncreaseQuantity(oEvent) {
 			this._stepItemQuantity(oEvent, 1);
 		},
-		
+
 		_stepItemQuantity(oEvent, nStep) {
 			const oButton = oEvent.getSource();
 			const sItemPath = oButton.getBindingContext().sPath;
 			const oItem = this.getModel().getProperty(sItemPath);
-			var updateQuantity = oItem.updateQuantity
-				? Number(oItem.updateQuantity) + nStep
-				: nStep;
-			
+			var updateQuantity = oItem.updateQuantity ? Number(oItem.updateQuantity) + nStep : nStep;
+
 			// Urgent board currently uses one way data binding
 			this.getModel().setProperty(sItemPath + "/updateQuantity", updateQuantity.toString());
-			
+
 		},
-		
+
 		// Event handler for on save updates event
 		// Used for when inline quantities have been updated
 		// In this case, just trigger a submit changes (silently)
@@ -1379,26 +1390,39 @@ sap.ui.define([
 				},
 				error: this._handleSimpleODataError.bind(this)
 			});
-			
+
 		},
-		
+
 		// Check there are no errors (only relevant if there are inline quantities to be changed)
 		onValidationRequest() {
-			
+
 			// Simple validation - check if there are any inputs with errors
 			var errors = $(".sapMInputBaseContentWrapperError").length,
 				result = errors === 0;
-			
+
 			// Raise the response event back to the consumer
 			sap.ui.getCore().getEventBus().publish("codan.zUrgentBoard", "validationResult", {
 				result: result
 			});
 		},
-		
+
 		updateInlineQty(event) {
 			var path = event.getSource().getBindingContext().getPath();
-			
-			this.getModel().setProperty(path + "/updateQuantity", event.getParameter("newValue")); 
+
+			this.getModel().setProperty(path + "/updateQuantity", event.getParameter("newValue"));
+		},
+
+		resetTableBindings() {
+			var main = this._byId("tableMain"),
+				completed = this._byId("tableCompleted");
+
+			if (main) {
+				main.getBinding("items").refresh(true);
+			}
+
+			if (completed) {
+				completed.getBinding("items").refresh(true);
+			}
 		}
 	});
 });
