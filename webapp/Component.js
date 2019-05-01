@@ -475,7 +475,7 @@ sap.ui.define([
 					}`,
 				`Quantity issued:  ${oData.quantityIssued} ${oData.uom}`,
 				`Quantity remaining:  ${
-						oData.unlimitedQuantity ? "unlimited" : oData.quantity
+						oData.unlimitedQuantity ? "unlimited" : Number(oData.quantity) - Number(oData.quantityIssued)
 					} ${
 						oData.unlimitedQuantity ? "" : oData.uom
 					}`,
