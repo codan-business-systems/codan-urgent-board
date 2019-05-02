@@ -687,6 +687,7 @@ sap.ui.define([
 
 		setDueToday() {
 			this._oViewModel.setProperty("/searchDateFrom", new Date());
+			this._oViewModel.setProperty("/searchDateTo", new Date());
 			this.onSearch();
 		},
 
