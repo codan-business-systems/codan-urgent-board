@@ -895,7 +895,7 @@ sap.ui.define([
 
 		confirmDeleteSelectedItems(aSelected) {
 			var oTable = this._byId("tableMain");
-			var aSelectedItems = aSelected || oTable.getSelectedItems();
+			var aSelectedItems = !aSelected.length ? oTable.getSelectedItems() : aSelected;
 			MessageBox.confirm(`Are you sure you want to delete ${aSelectedItems.length} item(s)?`, {
 				onClose: (oAction) => {
 					if (oAction === MessageBox.Action.OK) {

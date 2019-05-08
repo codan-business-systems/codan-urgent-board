@@ -49,7 +49,7 @@
 			<Column id="colMaterial" width="20%">
 				<Text text="Material"/>
 			</Column>
-			<Column id="colOrder">
+			<Column id="colOrder" width="8em">
 				<Text text="Order"/>
 			</Column>
 			<Column id="colSupplier">
@@ -58,7 +58,7 @@
 			<Column id="colQuantity" hAlign="Right">
 				<Text text="Quantity"/>
 			</Column>
-			<Column id="colInlineQty" hAlign="Right" visible="{viewModel>/settings/inlineQty}">
+			<Column id="colInlineQty" visible="{viewModel>/settings/inlineQty}" width="10em">
 				<Text text="+ Qty Received"/>
 			</Column>
 			<Column id="colDueDate">
