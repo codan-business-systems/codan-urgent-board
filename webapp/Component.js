@@ -638,7 +638,10 @@ sap.ui.define([
 		},
 
 		_resetItemOverflowPopover() {
-			this._resetODataModel();
+			// Don't reset if we update is not allowed
+			if (this._oViewModel.getProperty("/settings/allowUpdate")) {
+				this._resetODataModel();
+			}
 			this._resetFields();
 			this._oViewModel.setProperty("/itemPopover/hasError", false);
 			this._oViewModel.refresh();
