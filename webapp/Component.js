@@ -490,9 +490,14 @@ sap.ui.define([
 
 			var aLines = [
 				`Material:  ${oData.material} (${oData.description})`];
+			var nQuantityRemaining = Number(oData.quantity) - Number(oData.quantityIssued);
 				
 			if (oItemData.updateQuantity && Number(oItemData.updateQuantity) > 0) {
 				aLines.push(`Quantity received: ${oData.updateQuantity} ${oData.uom}`);
+				nQuantityRemaining = nQuantityRemaining - Number(oData.updateQuantity);
+				if (Number(nQuantityRemaining) < 0) {
+					nQuantityRemaining = Number(0);
+				}
 			}
 			aLines = aLines.concat([
 				`Quantity required:  ${
@@ -502,7 +507,7 @@ sap.ui.define([
 					}`,
 				`Quantity already issued:  ${oData.quantityIssued} ${oData.uom}`,
 				`Quantity remaining:  ${
-						oData.unlimitedQuantity ? "unlimited" : Number(oData.quantity) - Number(oData.quantityIssued)
+						oData.unlimitedQuantity ? "unlimited" : nQuantityRemaining
 					} ${
 						oData.unlimitedQuantity ? "" : oData.uom
 					}`,
@@ -1409,6 +1414,11 @@ sap.ui.define([
 		// Used for when inline quantities have been updated
 		// In this case, just trigger a submit changes (silently)
 		onSaveUpdates() {
+			
+			// Some kind of bug here due to multiple components, this might be the best way around it
+			if (!this._oODataModel.oMetadata) {
+				return;
+			}
 
 			this._setBusy(true);
 
