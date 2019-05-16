@@ -27,9 +27,10 @@ sap.ui.define([
 	"codan/zurgentboard/model/formatters",
 	"sap/ui/core/ValueState",
 	"sap/ui/model/Sorter",
+	"sap/m/GroupHeaderListItem",
 	"codan/z_ie11_polyfill/Component" // Load polyfills for IE11
 ], function (UIComponent, Device, models, Filter, FilterOperator, MessageBox, MessageToast, MessageType, utils, formatters, ValueState,
-	Sorter) {
+	Sorter, GHLI) {
 	"use strict";
 
 	return UIComponent.extend("codan.zurgentboard.Component", {
@@ -69,6 +70,10 @@ sap.ui.define([
 				inlineQty: {
 					type: "string",
 					defaultValue: "false"
+				},
+				groupMaterials: {
+					type: "string",
+					defaultValue: "false"
 				}
 			}
 		},
@@ -106,6 +111,13 @@ sap.ui.define([
 			// Subscribe to urgent board events from consumer applications of this component
 			sap.ui.getCore().getEventBus().subscribe("codan.zUrgentBoard", "saveUpdates", this.onSaveUpdates, this);
 			sap.ui.getCore().getEventBus().subscribe("codan.zUrgentBoard", "validate", this.onValidationRequest, this);
+			
+			// Save the purchase order items & purchase order number passed in the component data
+			const oComponentData = this.getComponentData();
+			if (oComponentData && oComponentData.purchaseOrderItems && oComponentData.purchaseOrderItems.length > 0) {
+				this._oViewModel.setProperty("/purchaseOrderItems", oComponentData.purchaseOrderItems);
+			}
+			
 		},
 
 		_applyDefaultSortValues() {
@@ -185,6 +197,13 @@ sap.ui.define([
 			this.setProperty("inlineQty", allow);
 			const bAllow = (allow === "true" || allow === true);
 			this._oViewModel.setProperty("/settings/inlineQty", bAllow);
+			this._oViewModel.refresh();
+		},
+		
+		setGroupMaterials(allow) {
+			this.setProperty("groupMaterials", allow);
+			const bAllow = (allow === "true" || allow === true);
+			this._oViewModel.setProperty("/settings/groupMaterials", bAllow);
 			this._oViewModel.refresh();
 		},
 
@@ -386,7 +405,8 @@ sap.ui.define([
 
 		sendSelectedItemsEmail(aSelectedItems) {
 			const oTable = this._byId("tableMain");
-			const oSelectedItems = aSelectedItems || oTable.getSelectedItems();
+			// aSelectedItems may be an event, so check if it is a managed object and ignore if so
+			const oSelectedItems = aSelectedItems.getMetadata ? oTable.getSelectedItems() : aSelectedItems;
 
 			// Testing reveals that large number of items selected (e.g. 10 or 51) doesn't work - no feedback or response
 			// is given from sap.m.URLHelper.triggerEmail.  So limit to 5 materials for now - finding the
@@ -429,7 +449,8 @@ sap.ui.define([
 
 			// Get item 
 			var oButton = oEvent.getSource();
-			var sItemPath = oButton.getBindingContext().sPath;
+			var sItemPath = oButton.getBindingContext().sPath,
+			    updateQuantity = this._oODataModel.getProperty(sItemPath + "/updateQuantity");
 
 			// Ensure we have the latest up to date data
 			this._oODataModel.read(sItemPath, {
@@ -441,6 +462,7 @@ sap.ui.define([
 					if (oItemData.comments) {
 						sSubject = `${sSubject}: ${oItemData.comments}`;
 					}
+					oItemData.updateQuantity = updateQuantity;
 					const sBody = this._getEmailBodyForItem(oItemData);
 
 					this.openSendEmailDialog(oItemData.contactEmail, sSubject, sBody);
@@ -467,13 +489,18 @@ sap.ui.define([
 				});
 
 			var aLines = [
-				`Material:  ${oData.material} (${oData.description})`,
+				`Material:  ${oData.material} (${oData.description})`];
+				
+			if (oItemData.updateQuantity && Number(oItemData.updateQuantity) > 0) {
+				aLines.push(`Quantity received: ${oData.updateQuantity} ${oData.uom}`);
+			}
+			aLines = aLines.concat([
 				`Quantity required:  ${
 						oData.unlimitedQuantity ? "unlimited" : oData.quantity
 					} ${
 						oData.unlimitedQuantity ? "" : oData.uom
 					}`,
-				`Quantity issued:  ${oData.quantityIssued} ${oData.uom}`,
+				`Quantity already issued:  ${oData.quantityIssued} ${oData.uom}`,
 				`Quantity remaining:  ${
 						oData.unlimitedQuantity ? "unlimited" : Number(oData.quantity) - Number(oData.quantityIssued)
 					} ${
@@ -483,7 +510,7 @@ sap.ui.define([
 				`Contact:  ${oData.enteredByName}`,
 				`Deliver to:  ${oData.deliverTo}`,
 				`Comments:  ${oData.comments}`
-			];
+			]);
 
 			// If we have an order, insert details below material
 			if (oData.type) {
@@ -1431,11 +1458,62 @@ sap.ui.define([
 		
 		mainTableUpdateFinished(event) {
 			this._oViewModel.setProperty("/openItemCount", event.getParameter("total"));
+			
+			if (event.getParameter("reason") !== "Sort") {
+				this._applyMainTableGrouping();
+			}
 		},
 		
 		completeTableUpdateFinished(event) {
 			this._oViewModel.setProperty("/completeItemCount", event.getParameter("total"));
+		},
+		
+		_applyMainTableGrouping() {
+			// If we have the group materisl option set, add the grouping to the table
+			if (!this._oViewModel.getProperty("/settings/groupMaterials")) {
+				return;
+			}
+			
+			const table = this._byId("tableMain");
+			table.getBinding("items").sort(new Sorter({
+				path: "material",
+				group: true,
+				descending: false
+			}));
+		},
+		
+		createGroupHeader(oGroup) {
+			
+			// For the material specified (oGroup.key), get the description from the purchase order items.
+			const aPurchaseOrderItems = this._oViewModel.getProperty("/purchaseOrderItems");
+			  var sTitle = oGroup.key,
+				  sDescription = "",
+				  nQuantity = Number(0); 
+			
+			if (aPurchaseOrderItems) {
+				aPurchaseOrderItems
+					.filter(oItem => oItem.PartNumber === oGroup.key)
+					.forEach(oItem => {
+					if (!sDescription) {
+						sDescription = oItem.Description;
+					}
+					nQuantity = nQuantity + Number(oItem.QuantityReceived);
+					});
+					
+				if (sDescription) {
+					sTitle = `${sTitle} (${sDescription})`;
+				}
+				
+				sTitle = `${sTitle} \[Qty: ${nQuantity.toString()}\]`;
+				
+			}
+			
+			return new GHLI({
+				title: sTitle,
+				uppercase: false
+			});
 		}
+	
 	
 	});
 });

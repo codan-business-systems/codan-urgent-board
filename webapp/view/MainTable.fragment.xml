@@ -1,7 +1,11 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" class="sapUiSizeCompact" xmlns:mvc="sap.ui.core.mvc"
 	xmlns:html="http://www.w3.org/1999/xhtml" displayBlock="true">
 	<Table id="tableMain" width="auto" mode="MultiSelect" selectionChange="onTableSelectionChange" class="sapUiNoMargin"
-		items="{ path: '/Items', filters: { path: 'completedFlag', operator: 'EQ', value1: false }, parameters: { operationMode: 'Client', threshold: 500 } }"
+		items="{ path: '/Items', 
+				filters: { path: 'completedFlag', operator: 'EQ', value1: false },
+				groupHeaderFactory: '.createGroupHeader',
+				parameters: { operationMode: 'Client', threshold: 500 } 
+		}"
 		updateFinished="mainTableUpdateFinished">
 		<headerToolbar>
 			<Toolbar class="sapUiNoMargin">
@@ -46,7 +50,7 @@
 			</Toolbar>
 		</headerToolbar>
 		<columns>
-			<Column id="colMaterial" width="20%">
+			<Column id="colMaterial" width="20%" visible="{= !${viewModel>/settings/groupMaterials} }">
 				<Text text="Material"/>
 			</Column>
 			<Column id="colOrder" width="8em">

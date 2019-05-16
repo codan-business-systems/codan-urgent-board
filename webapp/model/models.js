@@ -145,12 +145,14 @@ sap.ui.define([
 					allowNavToGR: true,
 					showOpen: true,
 					showCompleted: false,
-					inlineQty: false
+					inlineQty: false,
+					groupMaterials: false
 				},
 				completeSelectedCount: 0,
 				changes:{},
 				openItemCount: 0,
-				completeItemCount: 0
+				completeItemCount: 0,
+				purchaseOrderItems: []
 			};
 		}
 	};
