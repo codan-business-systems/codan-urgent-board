@@ -973,6 +973,7 @@ sap.ui.define([
 				success: (oData) => {
 					this._setBusy(false);
 					if (!this._handleBatchResponseAndReturnErrorFlag(oData)) {
+						this.clearSelections();
 						MessageToast.show(`${aSelectedItems.length} item(s) removed`);
 					}
 					this._resetODataModel();
