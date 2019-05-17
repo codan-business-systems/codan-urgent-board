@@ -369,11 +369,18 @@ sap.ui.define([
 			this._oViewModel.setProperty("/selectedCount", aSelectedItems.length);
 		},
 
-		_byId(sControlId) {
+		/**
+		 * Get control by id
+		 *
+		 * @param {string} sControlId - id of control as defined in xml fragment
+		 * @param {boolean} bDontThrow - Don't throw exception if control not found
+		 * @returns {object} - UI5 control
+		 */
+		_byId(sControlId, bDontThrow) {
 			const sComponentId = this.getId();
 			const sFullId = `${sComponentId}--${sControlId}`;
 			const oControl = sap.ui.getCore().byId(sFullId);
-			if (!oControl) {
+			if (!oControl && !bDontThrow) {
 				throw new Error(`Unable to get reference to control ${sFullId}`);
 			}
 			return oControl;
@@ -613,8 +620,16 @@ sap.ui.define([
 		closeCreateDialog() {
 			this._byId("createItemDialog").close();
 		},
-
+		
 		createItem() {
+			this._createItem(false);
+		},
+		
+		createItemAndAddAnother() {
+			this._createItem(true);
+		},
+
+		_createItem(bAddAnotherAfterCreate) {
 			// Some front end validation for required fields that oData service doesn't give
 			// friendly messages if not provided.
 			if (!this._validateFieldsBeforeCreate()) {
@@ -629,7 +644,11 @@ sap.ui.define([
 			this._oODataModel.create(sPath, oNewItemData, {
 				success: (oData) => {
 					this._setBusy(false);
-					this.closeCreateDialog();
+					if (bAddAnotherAfterCreate) {
+						this._resetCreateForm();
+					} else {
+						this.closeCreateDialog();
+					}
 					MessageToast.show("Material '" + oData.description + "' added");
 					this._resetODataModel();
 				},
@@ -961,6 +980,7 @@ sap.ui.define([
 				success: (oData) => {
 					this._setBusy(false);
 					if (!this._handleBatchResponseAndReturnErrorFlag(oData)) {
+						this.clearSelections();
 						MessageToast.show(`${aSelectedItems.length} item(s) removed`);
 					}
 					this._resetODataModel();
@@ -1455,7 +1475,7 @@ sap.ui.define([
 
 		resetTableBindings() {
 			var main = this._byId("tableMain"),
-				completed = this._byId("tableCompleted");
+				completed = this._byId("tableCompleted", true);
 
 			if (main) {
 				main.getBinding("items").refresh(true);
