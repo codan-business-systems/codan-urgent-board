@@ -164,16 +164,18 @@
 				text="{viewModel>/create/message/text}"
 				type="{viewModel>/create/message/type}"/>
 		</content>
-		<beginButton>
+		<buttons>
 			<Button
 				press="closeCreateDialog"
 				text="Cancel"/>
-		</beginButton>
-		<endButton>
 			<Button
 				type="Accept"
 				press="createItem"
 				text="Create"/>
-		</endButton>
+			<Button
+				type="Accept"
+				press="createItemAndAddAnother"
+				text="Create and add another"/>
+		</buttons>
 	</Dialog>
 </core:FragmentDefinition>

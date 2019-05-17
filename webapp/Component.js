@@ -613,8 +613,16 @@ sap.ui.define([
 		closeCreateDialog() {
 			this._byId("createItemDialog").close();
 		},
-
+		
 		createItem() {
+			this._createItem(false);
+		},
+		
+		createItemAndAddAnother() {
+			this._createItem(true);
+		},
+
+		_createItem(bAddAnotherAfterCreate) {
 			// Some front end validation for required fields that oData service doesn't give
 			// friendly messages if not provided.
 			if (!this._validateFieldsBeforeCreate()) {
@@ -629,7 +637,11 @@ sap.ui.define([
 			this._oODataModel.create(sPath, oNewItemData, {
 				success: (oData) => {
 					this._setBusy(false);
-					this.closeCreateDialog();
+					if (bAddAnotherAfterCreate) {
+						this._resetCreateForm();
+					} else {
+						this.closeCreateDialog();
+					}
 					MessageToast.show("Material '" + oData.description + "' added");
 					this._resetODataModel();
 				},
