@@ -860,6 +860,7 @@ sap.ui.define([
 						this._oViewModel.setProperty(sValueStateTextPath, "");
 					}
 					this._resetErrorFlagItemOverflowPopover();
+					this._oODataModel.refresh(); // Needed to make form reactive - e.g. on change to unlimited qty
 					MessageToast.show("Item updated.");
 					//this._resetODataModel();
 
