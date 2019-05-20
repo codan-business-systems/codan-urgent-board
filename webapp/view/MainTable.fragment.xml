@@ -98,7 +98,7 @@
 						<Input 
 							type="Number" 
 							value="{updateQuantity}" 
-							liveChange="updateInlineQty"
+							change="updateInlineQty"
 							valueLiveUpdate="true"
 							valueState="{ parts: ['quantity', 'quantityIssued', 'unlimitedQuantity', 'updateQuantity'], 
 										  formatter: '.formatters.validateUpdateQuantity' 
