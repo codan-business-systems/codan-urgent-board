@@ -60,7 +60,8 @@
 				"sap.m": {}
 			},
 			"components": {
-				"codan.z_ie11_polyfill": {}
+				"codan.z_ie11_polyfill": {},
+				"codan.zsendemail": {}
 			}
 		},
 		"contentDensities": {

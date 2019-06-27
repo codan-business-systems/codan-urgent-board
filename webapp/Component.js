@@ -13,6 +13,7 @@
  * are done here.
  */
 jQuery.sap.registerModulePath("codan.z_ie11_polyfill", "/sap/bc/ui5_ui5/sap/z_ie11_polyfill");
+jQuery.sap.registerModulePath("codan.zsendemail", "/sap/bc/ui5_ui5/sap/z_send_email");
 
 sap.ui.define([
 	"sap/ui/core/UIComponent",
@@ -79,6 +80,7 @@ sap.ui.define([
 		},
 
 		formatters: formatters,
+		_oSendEmail: null, // Send email reuse component
 
 		_oViewModel: null, // Defined in manifest.json, set in init()
 		_oODataModel: null, // Defined in manifest.json, set in init()
@@ -118,6 +120,27 @@ sap.ui.define([
 				this._oViewModel.setProperty("/purchaseOrderItems", oComponentData.purchaseOrderItems);
 			}
 			
+			this._loadSendEmailComponent();
+		},
+		
+		_loadSendEmailComponent() {
+			sap.ui.component({
+				name: "codan.zsendemail",
+				settings: {
+					showButton: false // We provide our own button(s)
+				},
+				componentData: {},
+				async: true,
+				manifestFirst: true  //deprecated from 1.49+
+				// manifest: true    //SAPUI5 >= 1.49
+			}).then(function (oComponent) {
+				this._oSendEmail = oComponent;
+				// oComponent.attachSent(this.onEmailSent.bind(this));
+				// oComponent.attachCancelled(this.onEmailCancelled.bind(this));
+				this.byId("componentSendEmail").setComponent(oComponent);
+			}.bind(this)).catch(function(oError) {
+				jQuery.sap.log.error(oError);
+			});
 		},
 
 		_applyDefaultSortValues() {
@@ -415,16 +438,6 @@ sap.ui.define([
 			// aSelectedItems may be an event, so check if it is a managed object and ignore if so
 			const oSelectedItems = aSelectedItems.getMetadata ? oTable.getSelectedItems() : aSelectedItems;
 
-			// Testing reveals that large number of items selected (e.g. 10 or 51) doesn't work - no feedback or response
-			// is given from sap.m.URLHelper.triggerEmail.  So limit to 5 materials for now - finding the
-			// actual limit would require painstaking testing because it may differ on different machines and will
-			// probably turn out to be a limit on the body content size in bytes and not the number of items.
-			/*const nMaxItems = 5;
-			if (oSelectedItems.length > nMaxItems) {
-				MessageBox.warning("Too many items selected for sending email.  Please limit your selection to " + nMaxItems);
-				return;
-			}*/
-
 			// Get item data for selected items
 			const aItemData = oSelectedItems
 				.map(oTableItem => oTableItem.getBindingContextPath())
@@ -449,7 +462,11 @@ sap.ui.define([
 				.join(sItemSeparator);
 			sBody = `${sItemSeparator}${sBody}${sItemSeparator}`;
 
-			this.openSendEmailDialog(sRecipients, sSubject, sBody);
+			// Set properties and open send email dialog
+			this._oSendEmail.setRecipients(sRecipients);
+			this._oSendEmail.setSubject(sSubject);
+			this._oSendEmail.setBodyText(sBody);
+			this._oSendEmail.showDialog();
 		},
 
 		sendItemEmail(oEvent) {
@@ -472,7 +489,11 @@ sap.ui.define([
 					oItemData.updateQuantity = updateQuantity;
 					const sBody = this._getEmailBodyForItem(oItemData);
 
-					this.openSendEmailDialog(oItemData.contactEmail, sSubject, sBody);
+					// Set properties and open send email dialog
+					this._oSendEmail.setRecipients(oItemData.contactEmail);
+					this._oSendEmail.setSubject(sSubject);
+					this._oSendEmail.setBodyText(sBody);
+					this._oSendEmail.showDialog();
 				}
 			});
 
@@ -1265,133 +1286,6 @@ sap.ui.define([
 			});
 		},
 
-		openSendEmailDialog(sRecipients, sSubject, sBody) {
-			var initData = {
-				recipients: {
-					value: sRecipients,
-					valueState: ValueState.None,
-					valueStateText: "",
-					required: true
-				},
-				ccRecipients: {
-					value: "",
-					valueState: ValueState.None,
-					valueStateText: ""
-				},
-				bccRecipients: {
-					value: "",
-					valueState: ValueState.None,
-					valueStateText: ""
-				},
-				subject: {
-					value: sSubject,
-					valueState: ValueState.None,
-					valueStateText: ""
-				},
-				bodyText: {
-					value: sBody,
-					valueState: ValueState.None,
-					valueStateText: ""
-				}
-			};
-
-			this._oViewModel.setProperty("/sendEmailFields", initData);
-
-			if (!this._oSendEmailDialog) {
-				this._oSendEmailDialog = this._byId("sendEmailDialog");
-			}
-			this._oSendEmailDialog.open();
-
-		},
-
-		validateSendEmail() {
-			var sendEmailFields = this._oViewModel.getProperty("/sendEmailFields"),
-				result = true;
-
-			this.validateEmailString(sendEmailFields.recipients);
-			this.validateEmailString(sendEmailFields.ccRecipients);
-			this.validateEmailString(sendEmailFields.bccRecipients);
-
-			for (var sField in sendEmailFields) {
-				if (sendEmailFields[sField].valueState === ValueState.Error) {
-					result = false;
-				}
-			}
-
-			this._oViewModel.setProperty("/sendEmailFields", sendEmailFields);
-
-			return result;
-
-		},
-
-		validateEmailString(oEmailField) {
-			oEmailField.valueState = ValueState.None;
-			oEmailField.valueStateText = "";
-
-			if (!oEmailField.value) {
-				if (oEmailField.required) {
-					oEmailField.valueState = ValueState.Error;
-					oEmailField.valueStateText = "Enter at least one recipient";
-				}
-				return;
-			}
-
-			var emails = oEmailField.value.split(";");
-
-			emails.forEach(email => {
-				if (!/([\w+-.%]+@[\w-.]+\.[A-Za-z]{2,4}?)+/.test(email)) {
-					oEmailField.valueState = ValueState.Error;
-					oEmailField.valueStateText = "Invalid email - enter an email address or list of emails separated by semi-colon (;)";
-				}
-			});
-
-		},
-
-		sendEmail() {
-
-			var that = this;
-			if (!this.validateSendEmail()) {
-				return;
-			}
-
-			this._setBusy(true);
-
-			var sendEmailFields = this._oViewModel.getProperty("/sendEmailFields");
-
-			this.getModel("common").callFunction("/SendEmail", {
-				method: "POST",
-				urlParameters: {
-					Recipients: sendEmailFields.recipients.value,
-					CCRecipients: sendEmailFields.ccRecipients.value || "",
-					BCCRecipients: sendEmailFields.bccRecipients.value || "",
-					Subject: sendEmailFields.subject.value || "",
-					BodyText: sendEmailFields.bodyText.value || ""
-				},
-				success: () => {
-					that._setBusy(false);
-
-					that._oSendEmailDialog.close();
-
-					MessageToast.show("Email Sent Successfully", {
-						duration: 5000
-					});
-				},
-				error: () => {
-					// Gotta do something.
-					that._setBusy(false);
-					MessageBox.error("An error occurred - the email has not been sent successfully.", {
-						title: "Unexpected error during email send"
-					});
-
-				}
-			});
-		},
-
-		closeSendEmailDialog() {
-			if (this._oSendEmailDialog) {
-				this._oSendEmailDialog.close();
-			}
-		},
 
 		onCompletedTableSelectionChange() {
 			var oTable = this._byId("tableCompleted");

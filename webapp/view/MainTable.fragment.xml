@@ -74,6 +74,7 @@
 			<Column id="colDeliverToNotes" width="15rem">
 				<Text text="Deliver to / Notes"/>
 			</Column>
+			<!-- Overflow button and I'm here icon -->
 			<Column></Column>
 		</columns>
 		<items>
@@ -110,8 +111,19 @@
 					<Text text="{ path: 'dueDate', type: 'sap.ui.model.type.Date', formatOptions: { pattern: 'dd/MM/yyyy' } }"/>
 					<Text text="{enteredByName}"/>
 					<Text text="{ parts: ['deliverTo', 'comments'], formatter: '.formatters.deliverToAndNotesText' }"/>
-					<Button icon="sap-icon://overflow" press="toggleItemOverflowPopover" tooltip="Edit item details"
-						type="{= !!${comments} ? 'Emphasized' : 'Default' }"/>
+					<HBox justifyContent="Center" alignContent="Center" alignItems="Center">
+						<Button icon="sap-icon://overflow" press="toggleItemOverflowPopover" tooltip="Edit item details"
+							type="{= !!${comments} ? 'Emphasized' : 'Default' }"/>
+						<core:Icon
+							class="sapUiTinyMarginBegin"
+							size="1.5rem"
+							color="{
+								path: 'ImHere',
+								formatter: '.formatters.imHereIconColor'
+							}"
+							src="sap-icon://shipping-status"
+							tooltip="Part is on 'I'm Here' list"/>
+					</HBox>
 				</cells>
 			</ColumnListItem>
 		</items>
@@ -119,7 +131,6 @@
 			<core:Fragment fragmentName="codan.zurgentboard.view.SortSettings" type="XML"/>
 			<core:Fragment fragmentName="codan.zurgentboard.view.SearchSettings" type="XML"/>
 			<core:Fragment fragmentName="codan.zurgentboard.view.CreateItemDialog" type="XML"/>
-			<core:Fragment fragmentName="codan.zurgentboard.view.SendEmailDialog" type="XML"/>
 		</dependents>
 	</Table>
 </core:FragmentDefinition>
