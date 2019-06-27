@@ -114,6 +114,16 @@ sap.ui.define([
 			}
 			
 			return result;
+		},
+		
+		/**
+		 * Adapt color of I'm Here icon rather than set visibility so as to
+		 * preserve column sizing / overflow button alignment
+		 */
+		imHereIconColor(bImHere) {
+			return bImHere
+				? 'green'
+				: "#F5F5F5"; // Gray so light it's almost invisible
 		}
 	};
 });
