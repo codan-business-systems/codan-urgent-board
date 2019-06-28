@@ -391,7 +391,7 @@ sap.ui.define([
 			var aSelectedItems = oTable.getSelectedItems();
 			this._oViewModel.setProperty("/selectedCount", aSelectedItems.length);
 		},
-
+		
 		/**
 		 * Get control by id
 		 *
@@ -672,6 +672,7 @@ sap.ui.define([
 					}
 					MessageToast.show("Material '" + oData.description + "' added");
 					this._resetODataModel();
+					this._oODataModel.refresh(); // Make list show newly created item
 				},
 				error: (oError) => {
 					this._setBusy(false);
@@ -715,6 +716,7 @@ sap.ui.define([
 				this._resetODataModel();
 			}
 			this._resetFields();
+			this._oViewModel.setProperty("/settings/allowPoUpdate", false);
 			this._oViewModel.setProperty("/itemPopover/hasError", false);
 			this._oViewModel.refresh();
 		},

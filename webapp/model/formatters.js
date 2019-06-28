@@ -122,8 +122,13 @@ sap.ui.define([
 		 */
 		imHereIconColor(bImHere) {
 			return bImHere
-				? 'green'
+				? "green"
 				: "#F5F5F5"; // Gray so light it's almost invisible
+		},
+		
+		poInputEnabled(bAllowUpdate, bAllowPoUpdate) {
+			return bAllowUpdate // Globally editing is allowed
+			  && bAllowPoUpdate; // User has clicked pencil
 		}
 	};
 });

@@ -15,8 +15,10 @@
 				class="editableForm">
 				<form:layout>
 					<form:ResponsiveGridLayout
-						labelSpanL="3"
-						labelSpanM="3"
+						labelSpanS="4"
+						labelSpanL="4"
+						labelSpanM="4"
+						emptySpanS="0"
 						emptySpanL="0"
 						emptySpanM="0"
 						columnsL="1"
@@ -38,7 +40,7 @@
 										valueState="{viewModel>/fields/quantity/valueState}"
 										valueStateText="{viewModel>/fields/quantity/valueStateText}">
 										<layoutData>
-											<layout:GridData span="L2 M2 S4" />
+											<layout:GridData span="L4 M4 S4" />
 										</layoutData>
 									</Input>
 									<CheckBox
@@ -48,7 +50,7 @@
 										selected="{unlimitedQuantity}"
 										valueState="{viewModel>/fields/unlimitedQuantity/valueState}">
 										<layoutData>
-											<layout:GridData span="L2 M2 S4" />
+											<layout:GridData span="L4 M4 S4" />
 										</layoutData>
 									</CheckBox>
 								</form:fields>
@@ -63,6 +65,50 @@
 										valueState="{viewModel>/fields/quantityIssued/valueState}"
 										valueStateText="{viewModel>/fields/quantityIssued/valueStateText}">
 									</Input>
+								</form:fields>
+							</form:FormElement>
+							<form:FormElement
+								visible="{= ${type} === 'P' }"
+								label="Purchase Order">
+								<form:fields>
+									<Input
+										type="Text"
+										visible="{= ${type} === 'P'}"
+										enabled="{
+											parts: ['viewModel>/settings/allowUpdate', 'viewModel>/settings/allowPoUpdate'],
+											formatter: '.formatters.poInputEnabled'
+										}"
+										value="{objectkey}"
+										change="onItemFieldChange"
+										valueState="{viewModel>/fields/objectkey/valueState}"
+										valueStateText="{viewModel>/fields/objectkey/valueStateText}">
+										<layoutData>
+											<layout:GridData span="L4 M4 S4" />
+										</layoutData>
+									</Input>
+									<Input
+										type="Text"
+										visible="{= ${type} === 'P'}"
+										enabled="{
+											parts: ['viewModel>/settings/allowUpdate', 'viewModel>/settings/allowPoUpdate'],
+											formatter: '.formatters.poInputEnabled'
+										}"
+										value="{line}"
+										change="onItemFieldChange"
+										valueState="{viewModel>/fields/line/valueState}"
+										valueStateText="{viewModel>/fields/line/valueStateText}">
+										<layoutData>
+											<layout:GridData span="L2 M2 S2" />
+										</layoutData>
+									</Input>
+									<CheckBox
+										text="Edit"
+										visible="{= ${type} === 'P'}"
+										selected="{viewModel>/settings/allowPoUpdate}">
+										<layoutData>
+											<layout:GridData span="L2 M2 S2" />
+										</layoutData>
+									</CheckBox>
 								</form:fields>
 							</form:FormElement>
 							<form:FormElement
