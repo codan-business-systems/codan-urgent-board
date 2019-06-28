@@ -959,6 +959,7 @@ sap.ui.define([
 					var oPopover = utils.findControlInParents("sap.m.ResponsivePopover", oButton);
 					oPopover.close();
 					this._resetODataModel();
+					this._oODataModel.refresh(); // Force list to remove deleted item 
 				},
 				error: this._handleSimpleODataError.bind(this)
 			});
