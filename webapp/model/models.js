@@ -143,6 +143,7 @@ sap.ui.define([
 					allowUpdate: true,
 					allowUserFiltering: true,
 					allowNavToGR: true,
+					allowPoUpdate: false, // transient setting, user clicks icon to flip
 					showOpen: true,
 					showCompleted: false,
 					inlineQty: false,
